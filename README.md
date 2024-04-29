@@ -27,6 +27,8 @@ Reach full feature parity to Plex and possibly even Jellyfin.
 - [ ] Subtitles
 - [ ] Custom Plugins
 - [ ] Themes
+- [ ] Logging
+    - [ ] Analytics
 - [ ] Developer SDKs to build custom clients
     - [ ] JavaScript
     - [ ] Golang
