@@ -1,0 +1,3 @@
+[submodule "clients/web"]
+	path = clients/web
+	url = https://github.com/siddhantmadhur/media-client-web
