@@ -13,3 +13,8 @@ type Profile struct {
 	Username string
 	Name     sql.NullString
 }
+
+type Setting struct {
+	Key   string
+	Value string
+}

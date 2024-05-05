@@ -41,3 +41,15 @@ func (q *Queries) GetProfiles(ctx context.Context) ([]GetProfilesRow, error) {
 	}
 	return items, nil
 }
+
+const isFinishedSetup = `-- name: IsFinishedSetup :one
+SELECT count(*) FROM settings
+WHERE key = 'finished'
+`
+
+func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, isFinishedSetup)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
