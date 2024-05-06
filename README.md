@@ -10,23 +10,15 @@ Reach full feature parity to Plex and possibly even Jellyfin.
     - [ ] Login with email and password
     - [ ] Options to add OAuth providers for easier access to friends and family
 - [ ] Clients
-    - [ ] Web 
-    - [ ] Native Desktop
-        - [ ] MacOS
-        - [ ] Windows
-        - [ ] Linux
+    - [ ] [Web](https://github.com/siddhantmadhur/media-client) 
     - [ ] iOS
     - [ ] Android
     - [ ] WebOS (LG)
-- [ ] Storage 
-    - [ ] SQLite/LibSQL for local storage
-    - [ ] Optional self-hosted cloud storage
-    - [ ] "Official" privately hosted cloud storage
-- [ ] Encoding
+- [ ] Encoding (ffmpeg)
 - [ ] Thumbnails
 - [ ] Subtitles
-- [ ] Custom Plugins
-- [ ] Themes
+- [ ] Allow custom plugins
+    - [ ] Themes
 - [ ] Logging
     - [ ] Analytics
 - [ ] Developer SDKs to build custom clients
@@ -38,8 +30,8 @@ Reach full feature parity to Plex and possibly even Jellyfin.
 Here I'll answer some questions about the project preemptively
 
 #### Why not fork Jellyfin, a project that intends to have the same goal?
-During my personal experience moving from Plex to Jellyfin I encountered a few hurdles and friction that I left me less than satisfied.
-Not to say Jellyfin isn't an absolutely amazing project, because it is and will be probably superior to this project for a very long time, but I would like to re-invent the wheel and create something that is aesthetically pleasing, fast and written in Golang.
+During my personal experience moving from Plex to Jellyfin I encountered a few hurdles and friction that eft me less than satisfied.
+Not to say Jellyfin isn't an amazing project because it is and will be probably superior to this project for a very long time, but I would like to re-invent the wheel and create something aesthetically pleasing, fast, and written in Golang.
 
 
 ##### Developement started on April 29, 2024
