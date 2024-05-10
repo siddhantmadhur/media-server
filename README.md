@@ -1,4 +1,4 @@
-# Media Server [W.I.P.]
+# Ocelot Media Server [W.I.P.]
 
 ### Purpose
 A free and open-source alternative to Plex Media Server that should look **beautiful**
