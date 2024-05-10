@@ -15,9 +15,7 @@ func runSqliteInit() error {
 	ctx := context.Background()
 
 	db, err := sql.Open("sqlite3", "./storage.db")
-	if err != nil {
-		return err
-	}
+	defer db.Close()
 	_, err = db.ExecContext(ctx, ddl)
 	if err != nil {
 		return err

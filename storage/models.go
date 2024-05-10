@@ -4,14 +4,11 @@
 
 package storage
 
-import (
-	"database/sql"
-)
-
 type Profile struct {
 	ID       int64
 	Username string
-	Name     sql.NullString
+	Password string
+	Type     int64
 }
 
 type Setting struct {

@@ -7,16 +7,37 @@ package storage
 
 import (
 	"context"
-	"database/sql"
 )
 
+const createProfile = `-- name: CreateProfile :exec
+INSERT INTO profiles (id, username, password, type) 
+VALUES ( ?, ?, ?, ? )
+`
+
+type CreateProfileParams struct {
+	ID       int64
+	Username string
+	Password string
+	Type     int64
+}
+
+func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) error {
+	_, err := q.db.ExecContext(ctx, createProfile,
+		arg.ID,
+		arg.Username,
+		arg.Password,
+		arg.Type,
+	)
+	return err
+}
+
 const getProfiles = `-- name: GetProfiles :many
-SELECT id, name FROM profiles
+SELECT id, username FROM profiles
 `
 
 type GetProfilesRow struct {
-	ID   int64
-	Name sql.NullString
+	ID       int64
+	Username string
 }
 
 func (q *Queries) GetProfiles(ctx context.Context) ([]GetProfilesRow, error) {
@@ -28,7 +49,7 @@ func (q *Queries) GetProfiles(ctx context.Context) ([]GetProfilesRow, error) {
 	var items []GetProfilesRow
 	for rows.Next() {
 		var i GetProfilesRow
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		if err := rows.Scan(&i.ID, &i.Username); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -43,8 +64,7 @@ func (q *Queries) GetProfiles(ctx context.Context) ([]GetProfilesRow, error) {
 }
 
 const isFinishedSetup = `-- name: IsFinishedSetup :one
-SELECT count(*) FROM settings
-WHERE key = 'finished'
+SELECT count(*) FROM profiles
 `
 
 func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {

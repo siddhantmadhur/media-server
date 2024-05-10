@@ -1,6 +1,8 @@
 package storage
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func GetConn() (*sql.DB, *Queries, error) {
 
