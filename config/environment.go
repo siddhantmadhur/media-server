@@ -5,10 +5,6 @@ import (
 	"strconv"
 )
 
-type Config struct {
-	Port int `json:"port"`
-}
-
 func SetEnvironment() (Config, error) {
 	var config = Config{
 		Port: 8080,
