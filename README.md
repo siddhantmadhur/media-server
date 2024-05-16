@@ -10,10 +10,9 @@ Reach full feature parity to Plex and possibly even Jellyfin.
     - [ ] Login with email and password
     - [ ] Options to add OAuth providers for easier access to friends and family
 - [ ] Clients
-    - [ ] [Web](https://github.com/siddhantmadhur/media-client) 
+    - [ ] Web
     - [ ] iOS
     - [ ] Android
-    - [ ] WebOS (LG)
 - [ ] Encoding (ffmpeg)
 - [ ] Thumbnails
 - [ ] Subtitles
