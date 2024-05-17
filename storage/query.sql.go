@@ -7,6 +7,7 @@ package storage
 
 import (
 	"context"
+	"time"
 )
 
 const createProfile = `-- name: CreateProfile :exec
@@ -29,6 +30,37 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) er
 		arg.Type,
 	)
 	return err
+}
+
+const createSession = `-- name: CreateSession :one
+INSERT INTO sessions (user_id, created_at, expires_at, refresh_token)
+VALUES (?, ?, ?, ?)
+RETURNING id, user_id, created_at, expires_at, refresh_token
+`
+
+type CreateSessionParams struct {
+	UserID       int64
+	CreatedAt    time.Time
+	ExpiresAt    time.Time
+	RefreshToken string
+}
+
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+	row := q.db.QueryRowContext(ctx, createSession,
+		arg.UserID,
+		arg.CreatedAt,
+		arg.ExpiresAt,
+		arg.RefreshToken,
+	)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+		&i.RefreshToken,
+	)
+	return i, err
 }
 
 const getProfiles = `-- name: GetProfiles :many
@@ -61,6 +93,28 @@ func (q *Queries) GetProfiles(ctx context.Context) ([]GetProfilesRow, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getUserWithPassword = `-- name: GetUserWithPassword :one
+SELECT id, username, password, type FROM profiles 
+WHERE username = ? and password = ?
+`
+
+type GetUserWithPasswordParams struct {
+	Username string
+	Password string
+}
+
+func (q *Queries) GetUserWithPassword(ctx context.Context, arg GetUserWithPasswordParams) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, getUserWithPassword, arg.Username, arg.Password)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Type,
+	)
+	return i, err
 }
 
 const isFinishedSetup = `-- name: IsFinishedSetup :one

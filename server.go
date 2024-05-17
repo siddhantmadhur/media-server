@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"ocelot/config"
 	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/siddhantmadhur/media-server/config"
 )
 
 func main() {
@@ -18,11 +18,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	config, err := config.SetEnvironment()
+	var config config.Config
+	err = config.Read()
+
 	if err != nil {
-		log.Fatal("There was an error in connecting to the sqlite file: " + err.Error())
+		log.Fatal("[ERROR]: Config could not be read. " + err.Error())
 		os.Exit(1)
 	}
+
 	e := echo.New()
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

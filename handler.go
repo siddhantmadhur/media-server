@@ -1,20 +1,23 @@
 package main
 
 import (
-	"net/http"
+	"ocelot/auth"
+	"ocelot/config"
+	"ocelot/wizard"
 
 	"github.com/labstack/echo/v4"
-	"github.com/siddhantmadhur/media-server/auth"
-	"github.com/siddhantmadhur/media-server/config"
 )
 
 func handler(e *echo.Echo) {
 
-	e.GET("/health-check", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Health OK!")
-	})
-	e.GET("/config/finished", config.IsFinishedSetup)
-	e.POST("/config/create-admin", config.CreateAdminUser)
+	// Wizard routes
+	e.GET("/wizard/get-first-user", wizard.WizardMiddleware(wizard.GetUser))
+	e.GET("/wizard/is-finished", wizard.IsFinishedSetup)
+	e.POST("/wizard/create-first-user", wizard.WizardMiddleware(wizard.CreateAdminUser))
 
+	// Server config
+	e.GET("/server/information", config.GetServerInformation)
+
+	// Auth routes
 	e.POST("/auth/login", auth.Login)
 }

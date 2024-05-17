@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	Port      int    `toml:"port"`
-	SecretKey string `toml:"secret_key"`
+	Port           int    `toml:"port"`
+	SecretKey      string `toml:"secret_key"`
+	FinishedWizard bool   `toml:"finished_wizard"`
 }
 
 func (c *Config) Read() error {
@@ -31,8 +32,9 @@ func (c *Config) Read() error {
 		}
 
 		var defaultConfig = Config{
-			Port:      8080,
-			SecretKey: key.PublicKey.N.Text(62),
+			Port:           8080,
+			SecretKey:      key.PublicKey.N.Text(62),
+			FinishedWizard: false,
 		}
 		err = toml.NewEncoder(f).Encode(defaultConfig)
 		*c = defaultConfig

@@ -4,6 +4,18 @@
 
 package storage
 
+import (
+	"time"
+)
+
+type MediaLibrary struct {
+	ID        int64
+	Owner     int64
+	CreatedAt time.Time
+	Path      string
+	Type      string
+}
+
 type Profile struct {
 	ID       int64
 	Username string
@@ -11,7 +23,10 @@ type Profile struct {
 	Type     int64
 }
 
-type Setting struct {
-	Key   string
-	Value string
+type Session struct {
+	ID           int64
+	UserID       int64
+	CreatedAt    time.Time
+	ExpiresAt    time.Time
+	RefreshToken string
 }
