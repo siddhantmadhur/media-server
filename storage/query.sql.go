@@ -11,46 +11,48 @@ import (
 )
 
 const createProfile = `-- name: CreateProfile :exec
-INSERT INTO profiles (id, username, password, type) 
-VALUES ( ?, ?, ?, ? )
+INSERT INTO profiles (username, password, type) 
+VALUES ( ?, ?, ? )
 `
 
 type CreateProfileParams struct {
-	ID       int64
 	Username string
 	Password string
 	Type     int64
 }
 
 func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) error {
-	_, err := q.db.ExecContext(ctx, createProfile,
-		arg.ID,
-		arg.Username,
-		arg.Password,
-		arg.Type,
-	)
+	_, err := q.db.ExecContext(ctx, createProfile, arg.Username, arg.Password, arg.Type)
 	return err
 }
 
 const createSession = `-- name: CreateSession :one
-INSERT INTO sessions (user_id, created_at, expires_at, refresh_token)
-VALUES (?, ?, ?, ?)
-RETURNING id, user_id, created_at, expires_at, refresh_token
+INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, client_name, client_version)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, user_id, created_at, expires_at, device, device_name, client_name, client_version
 `
 
 type CreateSessionParams struct {
-	UserID       int64
-	CreatedAt    time.Time
-	ExpiresAt    time.Time
-	RefreshToken string
+	ID            string
+	UserID        int64
+	CreatedAt     time.Time
+	ExpiresAt     time.Time
+	Device        string
+	DeviceName    string
+	ClientName    string
+	ClientVersion string
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
 	row := q.db.QueryRowContext(ctx, createSession,
+		arg.ID,
 		arg.UserID,
 		arg.CreatedAt,
 		arg.ExpiresAt,
-		arg.RefreshToken,
+		arg.Device,
+		arg.DeviceName,
+		arg.ClientName,
+		arg.ClientVersion,
 	)
 	var i Session
 	err := row.Scan(
@@ -58,7 +60,10 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		&i.UserID,
 		&i.CreatedAt,
 		&i.ExpiresAt,
-		&i.RefreshToken,
+		&i.Device,
+		&i.DeviceName,
+		&i.ClientName,
+		&i.ClientVersion,
 	)
 	return i, err
 }

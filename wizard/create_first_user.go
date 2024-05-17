@@ -12,6 +12,9 @@ func createFirstUser(username string, password string, confirmPassword string) e
 	if password != confirmPassword {
 		return errors.New("Password does not match")
 	}
+	if username == "" {
+		return errors.New("Username is empty")
+	}
 	conn, queries, err := storage.GetConn()
 	defer conn.Close()
 	if err != nil {

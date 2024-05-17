@@ -5,14 +5,14 @@ SELECT id, username FROM profiles;
 SELECT count(*) FROM profiles;
 
 -- name: CreateProfile :exec
-INSERT INTO profiles (id, username, password, type) 
-VALUES ( ?, ?, ?, ? );
+INSERT INTO profiles (username, password, type) 
+VALUES ( ?, ?, ? );
 
 -- name: GetUserWithPassword :one
 SELECT * FROM profiles 
 WHERE username = ? and password = ?; 
 
 -- name: CreateSession :one
-INSERT INTO sessions (user_id, created_at, expires_at, refresh_token)
-VALUES (?, ?, ?, ?)
+INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, client_name, client_version)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;

@@ -6,11 +6,14 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
     expires_at TIMESTAMP NOT NULL,
-    refresh_token text NOT NULL,
+    device TEXT NOT NULL,
+    device_name TEXT NOT NULL,
+    client_name TEXT NOT NULL,
+    client_version TEXT NOT NULL,
 
     FOREIGN KEY(user_id) REFERENCES profiles(id)
 );

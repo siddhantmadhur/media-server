@@ -38,6 +38,7 @@ func CreateAdminUser(c echo.Context) error {
 		ConfirmPassword string `json:"confirmPassword"`
 	}
 	err := c.Bind(&request)
+
 	if err != nil {
 		return err
 	}

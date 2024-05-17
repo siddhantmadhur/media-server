@@ -5,21 +5,22 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"time"
 
+	"ocelot/config"
 	"ocelot/storage"
 
 	"github.com/golang-jwt/jwt"
 )
 
 type User struct {
-	ID           string `json:"id"`
-	Username     string `json:"username"`
-	SessionToken string `json:"session_token"`
-	ExpiresAt    string `json:"expires_at"`
+	ID             string `json:"id"`
+	Username       string `json:"username"`
+	SessionToken   string `json:"session_token"`
+	ExpiresAt      string `json:"expires_at"`
+	JwtTokenString string `json:"jwt_token_string"`
 }
 
-func (u *User) Login(username string, password string) error {
+func (u *User) Login(username string, password string, device string, deviceName string, clientName string, clientVersion string) error {
 	conn, queries, err := storage.GetConn()
 	defer conn.Close()
 	if err != nil {
@@ -34,32 +35,28 @@ func (u *User) Login(username string, password string) error {
 		Username: username,
 		Password: string(hashedPass),
 	})
-	fmt.Printf("user: %s \n", user.Username)
 
 	if err != nil {
 		return errors.New("No user found.")
 	}
 
-	var data struct {
-		Id           string    `json:"id"`
-		Username     string    `json:"username"`
-		Type         int       `json:"type"`
-		ExpiresAt    time.Time `json:"expires_at"`
-		CreatedAt    time.Time `json:"created_at"`
-		AccessToken  string    `json:"access_token"`
-		RefreshToken string    `json:"refresh_token"`
-	}
+	session, err := createSession(int(user.ID), deviceName, clientName, clientVersion, device)
 
-	// TODO
-	// Change this to an environment variable
-	//var secret = "this-is-a-secret-32"
-	token := jwt.New(jwt.SigningMethodEdDSA)
-	fmt.Printf("data: %s\n", data.AccessToken)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(60 * time.Minute)
-	claims["username"] = username
-	claims["username"] = username
-	claims["username"] = username
+	claims := &jwt.MapClaims{
+		"exp": session.ExpiresAt.String(),
+		"data": map[string]string{
+			"id":       fmt.Sprint(user.ID),
+			"username": user.Username,
+			"session":  fmt.Sprint(session.ID),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	var config config.Config
+	tokenString, err := token.SignedString([]byte(config.SecretKey))
+	if err != nil {
+		return err
+	}
+	u.JwtTokenString = tokenString
 
 	return nil
 }
