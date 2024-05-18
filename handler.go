@@ -20,4 +20,5 @@ func handler(e *echo.Echo) {
 
 	// Auth routes
 	e.POST("/auth/login", auth.Login)
+	e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation))
 }

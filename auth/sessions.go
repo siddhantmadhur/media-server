@@ -10,7 +10,7 @@ import (
 
 func createSession(userId int, deviceName string, clientName string, clientVersion string, device string) (storage.Session, error) {
 	var session storage.Session
-	accessToken, err := rsa.GenerateKey(rand.Reader, 16*8)
+	accessToken, err := rsa.GenerateKey(rand.Reader, 24*8)
 	if err != nil {
 		return session, err
 	}

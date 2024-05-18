@@ -1,6 +1,8 @@
 package auth
 
-import "github.com/labstack/echo/v4"
+import (
+	"github.com/labstack/echo/v4"
+)
 
 // Return jwt on success
 func Login(c echo.Context) error {
@@ -26,4 +28,8 @@ func Login(c echo.Context) error {
 	return c.JSON(200, map[string]string{
 		"token": user.JwtTokenString,
 	})
+}
+
+func GetUserInformation(c echo.Context, user User) error {
+	return c.JSON(200, user)
 }

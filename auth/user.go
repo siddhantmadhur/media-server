@@ -16,8 +16,9 @@ type User struct {
 	ID             string `json:"id"`
 	Username       string `json:"username"`
 	SessionToken   string `json:"session_token"`
-	ExpiresAt      string `json:"expires_at"`
+	ExpiresAt      int64  `json:"expires_at"`
 	JwtTokenString string `json:"jwt_token_string"`
+	Type           int    `json:"type"`
 }
 
 func (u *User) Login(username string, password string, device string, deviceName string, clientName string, clientVersion string) error {
@@ -43,7 +44,9 @@ func (u *User) Login(username string, password string, device string, deviceName
 	session, err := createSession(int(user.ID), deviceName, clientName, clientVersion, device)
 
 	claims := &jwt.MapClaims{
-		"exp": session.ExpiresAt.String(),
+		"exp": session.ExpiresAt.Unix(),
+		"aud": "http://localhost:8080",
+		"iss": "ocelotsoftware.org",
 		"data": map[string]string{
 			"id":       fmt.Sprint(user.ID),
 			"username": user.Username,
@@ -52,6 +55,7 @@ func (u *User) Login(username string, password string, device string, deviceName
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	var config config.Config
+	config.Read()
 	tokenString, err := token.SignedString([]byte(config.SecretKey))
 	if err != nil {
 		return err
