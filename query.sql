@@ -8,6 +8,15 @@ SELECT count(*) FROM profiles;
 INSERT INTO profiles (username, password, type) 
 VALUES ( ?, ?, ? );
 
+-- name: GetAdminUser :one
+SELECT * FROM profiles
+WHERE type = 0;
+
+-- name: UpdateAdminUser :exec
+UPDATE profiles 
+SET username = ?, password = ?
+WHERE type = 0;
+
 -- name: GetUserWithPassword :one
 SELECT * FROM profiles 
 WHERE username = ? and password = ?; 

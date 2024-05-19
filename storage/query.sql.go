@@ -68,6 +68,23 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 	return i, err
 }
 
+const getAdminUser = `-- name: GetAdminUser :one
+SELECT id, username, password, type FROM profiles
+WHERE type = 0
+`
+
+func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, getAdminUser)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Type,
+	)
+	return i, err
+}
+
 const getProfiles = `-- name: GetProfiles :many
 SELECT id, username FROM profiles
 `
@@ -131,4 +148,20 @@ func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const updateAdminUser = `-- name: UpdateAdminUser :exec
+UPDATE profiles 
+SET username = ?, password = ?
+WHERE type = 0
+`
+
+type UpdateAdminUserParams struct {
+	Username string
+	Password string
+}
+
+func (q *Queries) UpdateAdminUser(ctx context.Context, arg UpdateAdminUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateAdminUser, arg.Username, arg.Password)
+	return err
 }
