@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"ocelot/config"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
@@ -44,7 +45,8 @@ func AuthenticateRoute(next RouteWithUser) echo.HandlerFunc {
 
 		claims := token.Claims.(jwt.MapClaims)
 		data := claims["data"].(map[string]interface{})
-		user.ID = data["id"].(string)
+		userId, err := strconv.Atoi(data["id"].(string))
+		user.ID = int64(userId)
 		user.Username = data["username"].(string)
 		user.SessionToken = data["session"].(string)
 		user.ExpiresAt = int64(claims["exp"].(float64))

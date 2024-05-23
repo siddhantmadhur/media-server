@@ -13,7 +13,7 @@ import (
 )
 
 type User struct {
-	ID             string `json:"id"`
+	ID             int64  `json:"id"`
 	Username       string `json:"username"`
 	SessionToken   string `json:"session_token"`
 	ExpiresAt      int64  `json:"expires_at"`
