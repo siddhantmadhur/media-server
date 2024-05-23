@@ -12,6 +12,7 @@ type Config struct {
 	Port           int    `toml:"port"`
 	SecretKey      string `toml:"secret_key"`
 	FinishedWizard bool   `toml:"finished_wizard"`
+	CacheDir       string `toml:"cache_dir"`
 }
 
 func (c *Config) Read() error {
