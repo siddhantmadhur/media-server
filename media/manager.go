@@ -4,6 +4,8 @@ import (
 	"errors"
 	"ocelot/config"
 	"os/exec"
+
+	"github.com/labstack/echo/v4"
 )
 
 type MediaManager struct {
@@ -21,6 +23,9 @@ func (m *MediaManager) GenerateM3UFile(mediaId string) (string, error) {
 		return "", errors.New("Media ID is invalid or empty")
 	}
 
+	file := "#EXTM3U\n"
+	file += ""
+
 	return "", nil
 }
 
@@ -34,4 +39,14 @@ func (m *MediaManager) RestartFFMPEG() error {
 	err := m.FFMPEGProcess.Start()
 
 	return err
+}
+
+// TODO: use path and not media id
+func (m *MediaManager) GetPlaylistFile(c echo.Context) error {
+	mediaId := c.Param("mediaId")
+	playlist, err := CreatePlaylistHLSFile(mediaId)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	return c.String(200, playlist)
 }

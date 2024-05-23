@@ -18,7 +18,7 @@ func GetLengthOfFile(path string) (float64, error) {
 }
 
 // Returns content of m3u8 file as a string or error
-func CreatePlaylistHLSFile(path string) (string, error) {
+func CreatePlaylistHLSFile(path string, mediaId string) (string, error) {
 	size, err := GetLengthOfFile(path)
 	counter := size
 	if err != nil {
@@ -38,7 +38,7 @@ func CreatePlaylistHLSFile(path string) (string, error) {
 			newTime = counter
 		}
 		content += fmt.Sprintf("#EXTINF:%.6f,\n", newTime)
-		content += fmt.Sprintf("stream%d.ts\n", idx)
+		content += fmt.Sprintf("/media/playback/%d/stream%d.ts\n", mediaId, idx)
 		counter -= newTime
 		idx += 1
 	}
