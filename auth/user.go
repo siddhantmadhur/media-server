@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -30,7 +31,8 @@ func (u *User) Login(username string, password string, device string, deviceName
 
 	h := sha256.New()
 
-	hashedPass := h.Sum([]byte(password))
+	h.Write([]byte(password))
+	hashedPass := base64.URLEncoding.EncodeToString(h.Sum(nil))
 
 	user, err := queries.GetUserWithPassword(context.Background(), storage.GetUserWithPasswordParams{
 		Username: username,

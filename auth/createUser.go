@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"log"
 	"net/http"
@@ -27,7 +28,8 @@ func createUser(username string, password string, confirmPassword string, priv i
 		return err
 	}
 	h := sha256.New()
-	hash := h.Sum([]byte(password))
+	h.Write([]byte(password))
+	hash := base64.URLEncoding.EncodeToString(h.Sum(nil))
 	err = queries.CreateProfile(context.Background(), storage.CreateProfileParams{
 		Username: username,
 		Password: string(hash),
