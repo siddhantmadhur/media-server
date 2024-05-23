@@ -3,6 +3,7 @@ package main
 import (
 	"ocelot/auth"
 	"ocelot/config"
+	"ocelot/library"
 	"ocelot/wizard"
 
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,9 @@ func handler(e *echo.Echo) {
 
 	// Server config
 	e.GET("/server/information", config.GetServerInformation)
+
+	// Library
+	e.POST("/server/media/library", auth.AuthenticateRoute(library.AddLibraryFolder))
 
 	// Auth routes
 	e.POST("/auth/login", auth.Login)
