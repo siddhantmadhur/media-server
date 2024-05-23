@@ -24,4 +24,20 @@ WHERE username = ? and password = ?;
 -- name: CreateSession :one
 INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, client_name, client_version)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING *;
+RETURNING *; 
+
+
+-- name: GetContentDirectories :many
+SELECT * FROM media_libraries;
+
+-- name: GetContentFromPath :one
+SELECT * FROM content
+WHERE path = ?;
+
+-- name: CreateMetadataForContent :exec
+INSERT INTO content(id, path, library_id, created_at)
+VALUES (?, ?, ?, ?);
+
+-- name: InsertIntoLibrary :exec
+INSERT INTO media_libraries(id, name, owner, created_at, path, type, content_hash) 
+VALUES (?, ?, ?, ?, ?, ?, ?);

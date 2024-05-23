@@ -10,6 +10,28 @@ import (
 	"time"
 )
 
+const createMetadataForContent = `-- name: CreateMetadataForContent :exec
+INSERT INTO content(id, path, library_id, created_at)
+VALUES (?, ?, ?, ?)
+`
+
+type CreateMetadataForContentParams struct {
+	ID        string
+	Path      string
+	LibraryID int64
+	CreatedAt time.Time
+}
+
+func (q *Queries) CreateMetadataForContent(ctx context.Context, arg CreateMetadataForContentParams) error {
+	_, err := q.db.ExecContext(ctx, createMetadataForContent,
+		arg.ID,
+		arg.Path,
+		arg.LibraryID,
+		arg.CreatedAt,
+	)
+	return err
+}
+
 const createProfile = `-- name: CreateProfile :exec
 INSERT INTO profiles (username, password, type) 
 VALUES ( ?, ?, ? )
@@ -85,6 +107,58 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 	return i, err
 }
 
+const getContentDirectories = `-- name: GetContentDirectories :many
+SELECT id, name, owner, created_at, path, type, content_hash FROM media_libraries
+`
+
+func (q *Queries) GetContentDirectories(ctx context.Context) ([]MediaLibrary, error) {
+	rows, err := q.db.QueryContext(ctx, getContentDirectories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MediaLibrary
+	for rows.Next() {
+		var i MediaLibrary
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Owner,
+			&i.CreatedAt,
+			&i.Path,
+			&i.Type,
+			&i.ContentHash,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getContentFromPath = `-- name: GetContentFromPath :one
+SELECT id, created_at, path, library_id FROM content
+WHERE path = ?
+`
+
+func (q *Queries) GetContentFromPath(ctx context.Context, path string) (Content, error) {
+	row := q.db.QueryRowContext(ctx, getContentFromPath, path)
+	var i Content
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Path,
+		&i.LibraryID,
+	)
+	return i, err
+}
+
 const getProfiles = `-- name: GetProfiles :many
 SELECT id, username FROM profiles
 `
@@ -137,6 +211,34 @@ func (q *Queries) GetUserWithPassword(ctx context.Context, arg GetUserWithPasswo
 		&i.Type,
 	)
 	return i, err
+}
+
+const insertIntoLibrary = `-- name: InsertIntoLibrary :exec
+INSERT INTO media_libraries(id, name, owner, created_at, path, type, content_hash) 
+VALUES (?, ?, ?, ?, ?, ?, ?)
+`
+
+type InsertIntoLibraryParams struct {
+	ID          int64
+	Name        string
+	Owner       int64
+	CreatedAt   time.Time
+	Path        string
+	Type        string
+	ContentHash string
+}
+
+func (q *Queries) InsertIntoLibrary(ctx context.Context, arg InsertIntoLibraryParams) error {
+	_, err := q.db.ExecContext(ctx, insertIntoLibrary,
+		arg.ID,
+		arg.Name,
+		arg.Owner,
+		arg.CreatedAt,
+		arg.Path,
+		arg.Type,
+		arg.ContentHash,
+	)
+	return err
 }
 
 const isFinishedSetup = `-- name: IsFinishedSetup :one
