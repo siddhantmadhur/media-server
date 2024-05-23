@@ -30,20 +30,3 @@ func GetUser(c echo.Context) error {
 
 	return c.String(200, "User")
 }
-
-func IsFinishedSetup(c echo.Context) error {
-	var config config.Config
-	err := config.Read()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, struct {
-			Msg string `json:"msg"`
-		}{
-			Msg: "[ERROR]: " + err.Error(),
-		})
-	}
-	return c.JSON(200, struct {
-		FinishedSetup bool `json:"finished_setup"`
-	}{
-		FinishedSetup: config.FinishedWizard,
-	})
-}

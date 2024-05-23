@@ -12,7 +12,6 @@ func handler(e *echo.Echo) {
 
 	// Wizard routes
 	e.GET("/wizard/get-first-user", wizard.WizardMiddleware(wizard.GetUser))
-	e.GET("/wizard/is-finished", wizard.IsFinishedSetup)
 
 	// Server config
 	e.GET("/server/information", config.GetServerInformation)
