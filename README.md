@@ -16,6 +16,13 @@ Reach full feature parity to Plex and possibly even Jellyfin.
     - [ ] Generate .ts files dynamically 
         - [ ] Thumbnails
         - [ ] Subtitles
+- [ ] Library
+    - [ ] Add directories
+    - [ ] Scan and add metadata for directories
+        - [ ] Scan on startup
+        - [ ] Search metadata from external API's
+        - [ ] Detect changes while server is still running
+    - [ ] Control permission for which users have access to which libraries
 - [ ] Allow custom plugins
     - [ ] Themes
 - [ ] Logging
