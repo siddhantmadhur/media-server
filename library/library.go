@@ -27,9 +27,6 @@ func AddLibraryFolder(c echo.Context, u auth.User) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-	if err != nil {
-		return c.String(500, err.Error())
-	}
 	err = queries.InsertIntoLibrary(context.Background(), storage.InsertIntoLibraryParams{
 		Owner:       u.ID,
 		Name:        request.Name,
@@ -38,6 +35,5 @@ func AddLibraryFolder(c echo.Context, u auth.User) error {
 		CreatedAt:   time.Now(),
 		ContentHash: "",
 	})
-
 	return c.NoContent(201)
 }
