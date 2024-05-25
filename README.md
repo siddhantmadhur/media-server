@@ -37,5 +37,5 @@ During my personal experience moving from Plex to Jellyfin I encountered a few h
 Not to say Jellyfin isn't an amazing project because it is and will be probably superior to this project for a very long time, but I would like to re-invent the wheel and create something aesthetically pleasing, fast, and written in Golang.
 
 
-##### Developement started on April 29, 2024 by Siddhant Madhur
+##### Development started on April 29, 2024 by Siddhant Madhur
 
