@@ -10,26 +10,65 @@ import (
 	"time"
 )
 
-const createMetadataForContent = `-- name: CreateMetadataForContent :exec
-INSERT INTO content(id, path, library_id, created_at)
-VALUES (?, ?, ?, ?)
+const addNewContent = `-- name: AddNewContent :one
+INSERT INTO content_library(created_at, file_path, media_library_id)
+VALUES ( ?, ?, ? )
+RETURNING id, created_at, file_path, media_library_id
 `
 
-type CreateMetadataForContentParams struct {
-	ID        string
-	Path      string
-	LibraryID int64
-	CreatedAt time.Time
+type AddNewContentParams struct {
+	CreatedAt      time.Time
+	FilePath       string
+	MediaLibraryID int64
 }
 
-func (q *Queries) CreateMetadataForContent(ctx context.Context, arg CreateMetadataForContentParams) error {
-	_, err := q.db.ExecContext(ctx, createMetadataForContent,
-		arg.ID,
-		arg.Path,
-		arg.LibraryID,
-		arg.CreatedAt,
+func (q *Queries) AddNewContent(ctx context.Context, arg AddNewContentParams) (ContentLibrary, error) {
+	row := q.db.QueryRowContext(ctx, addNewContent, arg.CreatedAt, arg.FilePath, arg.MediaLibraryID)
+	var i ContentLibrary
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.FilePath,
+		&i.MediaLibraryID,
 	)
-	return err
+	return i, err
+}
+
+const createNewMediaLibrary = `-- name: CreateNewMediaLibrary :one
+INSERT INTO media_library(created_at, name, description, device_path, media_type, owner_id) 
+VALUES (?, ?, ?, ?, ?, ?)
+RETURNING id, created_at, name, description, device_path, media_type, owner_id
+`
+
+type CreateNewMediaLibraryParams struct {
+	CreatedAt   time.Time
+	Name        string
+	Description string
+	DevicePath  string
+	MediaType   string
+	OwnerID     int64
+}
+
+func (q *Queries) CreateNewMediaLibrary(ctx context.Context, arg CreateNewMediaLibraryParams) (MediaLibrary, error) {
+	row := q.db.QueryRowContext(ctx, createNewMediaLibrary,
+		arg.CreatedAt,
+		arg.Name,
+		arg.Description,
+		arg.DevicePath,
+		arg.MediaType,
+		arg.OwnerID,
+	)
+	var i MediaLibrary
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.Description,
+		&i.DevicePath,
+		&i.MediaType,
+		&i.OwnerID,
+	)
+	return i, err
 }
 
 const createProfile = `-- name: CreateProfile :exec
@@ -107,58 +146,6 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 	return i, err
 }
 
-const getContentDirectories = `-- name: GetContentDirectories :many
-SELECT id, name, owner, created_at, path, type, content_hash FROM media_libraries
-`
-
-func (q *Queries) GetContentDirectories(ctx context.Context) ([]MediaLibrary, error) {
-	rows, err := q.db.QueryContext(ctx, getContentDirectories)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []MediaLibrary
-	for rows.Next() {
-		var i MediaLibrary
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Owner,
-			&i.CreatedAt,
-			&i.Path,
-			&i.Type,
-			&i.ContentHash,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getContentFromPath = `-- name: GetContentFromPath :one
-SELECT id, created_at, path, library_id FROM content
-WHERE path = ?
-`
-
-func (q *Queries) GetContentFromPath(ctx context.Context, path string) (Content, error) {
-	row := q.db.QueryRowContext(ctx, getContentFromPath, path)
-	var i Content
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.Path,
-		&i.LibraryID,
-	)
-	return i, err
-}
-
 const getProfiles = `-- name: GetProfiles :many
 SELECT id, username FROM profiles
 `
@@ -213,34 +200,6 @@ func (q *Queries) GetUserWithPassword(ctx context.Context, arg GetUserWithPasswo
 	return i, err
 }
 
-const insertIntoLibrary = `-- name: InsertIntoLibrary :exec
-INSERT INTO media_libraries(id, name, owner, created_at, path, type, content_hash) 
-VALUES (?, ?, ?, ?, ?, ?, ?)
-`
-
-type InsertIntoLibraryParams struct {
-	ID          int64
-	Name        string
-	Owner       int64
-	CreatedAt   time.Time
-	Path        string
-	Type        string
-	ContentHash string
-}
-
-func (q *Queries) InsertIntoLibrary(ctx context.Context, arg InsertIntoLibraryParams) error {
-	_, err := q.db.ExecContext(ctx, insertIntoLibrary,
-		arg.ID,
-		arg.Name,
-		arg.Owner,
-		arg.CreatedAt,
-		arg.Path,
-		arg.Type,
-		arg.ContentHash,
-	)
-	return err
-}
-
 const isFinishedSetup = `-- name: IsFinishedSetup :one
 SELECT count(*) FROM profiles
 `
@@ -250,6 +209,45 @@ func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const linkNewContentMetadata = `-- name: LinkNewContentMetadata :one
+INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date)
+VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT(content_id) DO 
+UPDATE SET title = ?, description = ?, poster_url = ?, release_date = ?
+RETURNING id, created_at, content_id, title, description, poster_url, release_date
+`
+
+type LinkNewContentMetadataParams struct {
+	CreatedAt   time.Time
+	ContentID   int64
+	Title       string
+	Description string
+	PosterUrl   string
+	ReleaseDate time.Time
+}
+
+func (q *Queries) LinkNewContentMetadata(ctx context.Context, arg LinkNewContentMetadataParams) (ContentMetadatum, error) {
+	row := q.db.QueryRowContext(ctx, linkNewContentMetadata,
+		arg.CreatedAt,
+		arg.ContentID,
+		arg.Title,
+		arg.Description,
+		arg.PosterUrl,
+		arg.ReleaseDate,
+	)
+	var i ContentMetadatum
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.ContentID,
+		&i.Title,
+		&i.Description,
+		&i.PosterUrl,
+		&i.ReleaseDate,
+	)
+	return i, err
 }
 
 const updateAdminUser = `-- name: UpdateAdminUser :exec

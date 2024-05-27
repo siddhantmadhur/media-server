@@ -18,23 +18,38 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY(user_id) REFERENCES profiles(id)
 );
 
-CREATE TABLE IF NOT EXISTS media_libraries (
+CREATE TABLE IF NOT EXISTS media_library (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    owner INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    path TEXT NOT NULL,
-    type TEXT NOT NULL,
-    content_hash TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    device_path TEXT NOT NULL,
+    media_type TEXT NOT NULL,
+    owner_id INTEGER NOT NULL,
 
-    FOREIGN KEY(owner) REFERENCES profiles(id)
+    FOREIGN KEY(owner_id) REFERENCES profiles(id),
+    UNIQUE(device_path)
 );
 
-CREATE TABLE IF NOT EXISTS content (
-    id TEXT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS content_library (
+    id INTEGER PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
-    path TEXT NOT NULL,
-    library_id INTEGER NOT NULL,
+    file_path TEXT NOT NULL,
+    media_library_id INTEGER NOT NULL,
 
-    FOREIGN KEY(library_id) REFERENCES media_libraries(id)
+    FOREIGN KEY(media_library_id) REFERENCES media_library(id),
+    UNIQUE(file_path)
+);
+
+CREATE TABLE IF NOT EXISTS content_metadata (
+    id INTEGER PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL,
+    content_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    poster_url TEXT NOT NULL,
+    release_date TIMESTAMP NOT NULL,
+    
+    FOREIGN KEY(content_id) REFERENCES content_library(id),
+    UNIQUE(content_id)
 );

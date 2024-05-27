@@ -11,9 +11,10 @@ import (
 
 func AddLibraryFolder(c echo.Context, u auth.User) error {
 	var request struct {
-		Path string `json:"path"`
-		Name string `json:"name"`
-		Type string `json:"type"`
+		Path        string `json:"path"`
+		Name        string `json:"name"`
+		Type        string `json:"type"`
+		Description string `json:"description"`
 	}
 	err := c.Bind(&request)
 	if err != nil {
@@ -27,13 +28,16 @@ func AddLibraryFolder(c echo.Context, u auth.User) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-	err = queries.InsertIntoLibrary(context.Background(), storage.InsertIntoLibraryParams{
-		Owner:       u.ID,
-		Name:        request.Name,
-		Path:        request.Path,
-		Type:        request.Name,
+	_, err = queries.CreateNewMediaLibrary(context.Background(), storage.CreateNewMediaLibraryParams{
+		OwnerID:     u.ID,
+		Name:        request.Path,
+		MediaType:   request.Type,
 		CreatedAt:   time.Now(),
-		ContentHash: "",
+		Description: request.Description,
 	})
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
 	return c.NoContent(201)
 }

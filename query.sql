@@ -26,18 +26,20 @@ INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *; 
 
+-- name: CreateNewMediaLibrary :one
+INSERT INTO media_library(created_at, name, description, device_path, media_type, owner_id) 
+VALUES (?, ?, ?, ?, ?, ?)
+RETURNING *;
 
--- name: GetContentDirectories :many
-SELECT * FROM media_libraries;
+-- name: AddNewContent :one
+INSERT INTO content_library(created_at, file_path, media_library_id)
+VALUES ( ?, ?, ? )
+RETURNING *;
 
--- name: GetContentFromPath :one
-SELECT * FROM content
-WHERE path = ?;
+-- name: LinkNewContentMetadata :one
+INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date)
+VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT(content_id) DO 
+UPDATE SET title = ?, description = ?, poster_url = ?, release_date = ?
+RETURNING *;
 
--- name: CreateMetadataForContent :exec
-INSERT INTO content(id, path, library_id, created_at)
-VALUES (?, ?, ?, ?);
-
--- name: InsertIntoLibrary :exec
-INSERT INTO media_libraries(id, name, owner, created_at, path, type, content_hash) 
-VALUES (?, ?, ?, ?, ?, ?, ?);

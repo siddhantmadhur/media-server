@@ -8,21 +8,31 @@ import (
 	"time"
 )
 
-type Content struct {
-	ID        string
-	CreatedAt time.Time
-	Path      string
-	LibraryID int64
+type ContentLibrary struct {
+	ID             int64
+	CreatedAt      time.Time
+	FilePath       string
+	MediaLibraryID int64
+}
+
+type ContentMetadatum struct {
+	ID          int64
+	CreatedAt   time.Time
+	ContentID   int64
+	Title       string
+	Description string
+	PosterUrl   string
+	ReleaseDate time.Time
 }
 
 type MediaLibrary struct {
 	ID          int64
-	Name        string
-	Owner       int64
 	CreatedAt   time.Time
-	Path        string
-	Type        string
-	ContentHash string
+	Name        string
+	Description string
+	DevicePath  string
+	MediaType   string
+	OwnerID     int64
 }
 
 type Profile struct {
