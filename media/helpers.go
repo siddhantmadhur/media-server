@@ -18,7 +18,7 @@ func GetLengthOfFile(path string) (float64, error) {
 }
 
 // Returns content of m3u8 file as a string or error
-func CreatePlaylistHLSFile(path string, mediaId string) (string, error) {
+func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 	size, err := GetLengthOfFile(path)
 	counter := size
 	if err != nil {

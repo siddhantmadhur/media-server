@@ -4,6 +4,7 @@ import (
 	"ocelot/auth"
 	"ocelot/config"
 	"ocelot/library"
+	"ocelot/media"
 	"ocelot/wizard"
 
 	"github.com/labstack/echo/v4"
@@ -24,5 +25,10 @@ func handler(e *echo.Echo) {
 	e.POST("/auth/login", auth.Login)
 	e.POST("/auth/create/user", auth.CreateUser)
 	e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation))
+
+	// Streaming routes
+
+	var streamer media.MediaManager
+	e.GET("/media/content/:mediaId", streamer.GetPlaylistFile)
 
 }

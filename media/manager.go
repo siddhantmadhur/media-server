@@ -1,9 +1,12 @@
 package media
 
 import (
+	"context"
 	"errors"
 	"ocelot/config"
+	"ocelot/storage"
 	"os/exec"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -43,8 +46,17 @@ func (m *MediaManager) RestartFFMPEG() error {
 
 // TODO: use path and not media id
 func (m *MediaManager) GetPlaylistFile(c echo.Context) error {
-	mediaId := c.Param("mediaId")
-	playlist, err := CreatePlaylistHLSFile(mediaId)
+	mediaId, err := strconv.Atoi(c.Param("mediaId"))
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	conn, queries, err := storage.GetConn()
+	defer conn.Close()
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	media, err := queries.GetContentInfo(context.Background(), int64(mediaId))
+	playlist, err := CreatePlaylistHLSFile(media.FilePath, mediaId)
 	if err != nil {
 		return c.String(500, err.Error())
 	}
