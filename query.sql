@@ -26,20 +26,21 @@ INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *; 
 
--- name: CreateNewMediaLibrary :one
+-- name: CreateMediaLibrary :one
 INSERT INTO media_library(created_at, name, description, device_path, media_type, owner_id) 
 VALUES (?, ?, ?, ?, ?, ?)
 RETURNING *;
 
--- name: AddNewContent :one
-INSERT INTO content_library(created_at, file_path, media_library_id)
-VALUES ( ?, ?, ? )
+-- name: AddContent :one
+INSERT INTO content_library(created_at, file_path, media_library_id, extension, name)
+VALUES ( ?, ?, ?, ? , ?)
 RETURNING *;
 
--- name: LinkNewContentMetadata :one
+-- name: LinkContentMetadata :one
 INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date)
 VALUES (?, ?, ?, ?, ?, ?)
-ON CONFLICT(content_id) DO 
-UPDATE SET title = ?, description = ?, poster_url = ?, release_date = ?
 RETURNING *;
 
+-- name: GetMediaLibrary :one
+SELECT * FROM media_library
+WHERE id = ?;

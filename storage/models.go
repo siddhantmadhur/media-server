@@ -13,6 +13,8 @@ type ContentLibrary struct {
 	CreatedAt      time.Time
 	FilePath       string
 	MediaLibraryID int64
+	Extension      string
+	Name           string
 }
 
 type ContentMetadatum struct {

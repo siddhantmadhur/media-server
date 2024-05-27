@@ -28,9 +28,10 @@ func AddLibraryFolder(c echo.Context, u auth.User) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-	_, err = queries.CreateNewMediaLibrary(context.Background(), storage.CreateNewMediaLibraryParams{
+	library, err := queries.CreateMediaLibrary(context.Background(), storage.CreateMediaLibraryParams{
 		OwnerID:     u.ID,
-		Name:        request.Path,
+		Name:        request.Name,
+		DevicePath:  request.Path,
 		MediaType:   request.Type,
 		CreatedAt:   time.Now(),
 		Description: request.Description,
@@ -38,6 +39,8 @@ func AddLibraryFolder(c echo.Context, u auth.User) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
+
+	go ScanLibrary(library.ID)
 
 	return c.NoContent(201)
 }

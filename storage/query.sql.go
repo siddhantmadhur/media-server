@@ -10,37 +10,47 @@ import (
 	"time"
 )
 
-const addNewContent = `-- name: AddNewContent :one
-INSERT INTO content_library(created_at, file_path, media_library_id)
-VALUES ( ?, ?, ? )
-RETURNING id, created_at, file_path, media_library_id
+const addContent = `-- name: AddContent :one
+INSERT INTO content_library(created_at, file_path, media_library_id, extension, name)
+VALUES ( ?, ?, ?, ? , ?)
+RETURNING id, created_at, file_path, media_library_id, extension, name
 `
 
-type AddNewContentParams struct {
+type AddContentParams struct {
 	CreatedAt      time.Time
 	FilePath       string
 	MediaLibraryID int64
+	Extension      string
+	Name           string
 }
 
-func (q *Queries) AddNewContent(ctx context.Context, arg AddNewContentParams) (ContentLibrary, error) {
-	row := q.db.QueryRowContext(ctx, addNewContent, arg.CreatedAt, arg.FilePath, arg.MediaLibraryID)
+func (q *Queries) AddContent(ctx context.Context, arg AddContentParams) (ContentLibrary, error) {
+	row := q.db.QueryRowContext(ctx, addContent,
+		arg.CreatedAt,
+		arg.FilePath,
+		arg.MediaLibraryID,
+		arg.Extension,
+		arg.Name,
+	)
 	var i ContentLibrary
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.FilePath,
 		&i.MediaLibraryID,
+		&i.Extension,
+		&i.Name,
 	)
 	return i, err
 }
 
-const createNewMediaLibrary = `-- name: CreateNewMediaLibrary :one
+const createMediaLibrary = `-- name: CreateMediaLibrary :one
 INSERT INTO media_library(created_at, name, description, device_path, media_type, owner_id) 
 VALUES (?, ?, ?, ?, ?, ?)
 RETURNING id, created_at, name, description, device_path, media_type, owner_id
 `
 
-type CreateNewMediaLibraryParams struct {
+type CreateMediaLibraryParams struct {
 	CreatedAt   time.Time
 	Name        string
 	Description string
@@ -49,8 +59,8 @@ type CreateNewMediaLibraryParams struct {
 	OwnerID     int64
 }
 
-func (q *Queries) CreateNewMediaLibrary(ctx context.Context, arg CreateNewMediaLibraryParams) (MediaLibrary, error) {
-	row := q.db.QueryRowContext(ctx, createNewMediaLibrary,
+func (q *Queries) CreateMediaLibrary(ctx context.Context, arg CreateMediaLibraryParams) (MediaLibrary, error) {
+	row := q.db.QueryRowContext(ctx, createMediaLibrary,
 		arg.CreatedAt,
 		arg.Name,
 		arg.Description,
@@ -146,6 +156,26 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 	return i, err
 }
 
+const getMediaLibrary = `-- name: GetMediaLibrary :one
+SELECT id, created_at, name, description, device_path, media_type, owner_id FROM media_library
+WHERE id = ?
+`
+
+func (q *Queries) GetMediaLibrary(ctx context.Context, id int64) (MediaLibrary, error) {
+	row := q.db.QueryRowContext(ctx, getMediaLibrary, id)
+	var i MediaLibrary
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.Description,
+		&i.DevicePath,
+		&i.MediaType,
+		&i.OwnerID,
+	)
+	return i, err
+}
+
 const getProfiles = `-- name: GetProfiles :many
 SELECT id, username FROM profiles
 `
@@ -211,15 +241,13 @@ func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const linkNewContentMetadata = `-- name: LinkNewContentMetadata :one
+const linkContentMetadata = `-- name: LinkContentMetadata :one
 INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date)
 VALUES (?, ?, ?, ?, ?, ?)
-ON CONFLICT(content_id) DO 
-UPDATE SET title = ?, description = ?, poster_url = ?, release_date = ?
 RETURNING id, created_at, content_id, title, description, poster_url, release_date
 `
 
-type LinkNewContentMetadataParams struct {
+type LinkContentMetadataParams struct {
 	CreatedAt   time.Time
 	ContentID   int64
 	Title       string
@@ -228,8 +256,8 @@ type LinkNewContentMetadataParams struct {
 	ReleaseDate time.Time
 }
 
-func (q *Queries) LinkNewContentMetadata(ctx context.Context, arg LinkNewContentMetadataParams) (ContentMetadatum, error) {
-	row := q.db.QueryRowContext(ctx, linkNewContentMetadata,
+func (q *Queries) LinkContentMetadata(ctx context.Context, arg LinkContentMetadataParams) (ContentMetadatum, error) {
+	row := q.db.QueryRowContext(ctx, linkContentMetadata,
 		arg.CreatedAt,
 		arg.ContentID,
 		arg.Title,

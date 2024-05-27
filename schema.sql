@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS content_library (
     created_at TIMESTAMP NOT NULL,
     file_path TEXT NOT NULL,
     media_library_id INTEGER NOT NULL,
+    extension TEXT NOT NULL,
+    name TEXT NOT NULL,
 
     FOREIGN KEY(media_library_id) REFERENCES media_library(id),
     UNIQUE(file_path)

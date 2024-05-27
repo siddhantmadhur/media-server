@@ -19,8 +19,10 @@ Reach full feature parity to Plex and possibly even Jellyfin.
 - [ ] Library
     - [X] Add directories
     - [ ] Scan and add metadata for directories
-        - [ ] Scan on startup
-        - [ ] Search metadata from external API's
+        - [X] Scan directory for files
+        - [ ] Match scanned files for metadata
+            - [ ] Search metadata from external API's
+        - [ ] Scan all folders on startup for changes
         - [ ] Detect changes while server is still running
     - [ ] Control permission for which users have access to which libraries
 - [ ] Allow custom plugins
