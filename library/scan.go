@@ -39,9 +39,10 @@ func ScanLibrary(mediaId int64) error {
 				Extension:      tokens[len(tokens)-1],
 				Name:           strings.Join(tokens[:len(tokens)-1], "."),
 			})
-			if err != nil {
-				return err
-			}
+			return err
+		} else {
+			// TODO: Add root show/season info
+
 		}
 		return err
 	})

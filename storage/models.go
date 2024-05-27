@@ -5,6 +5,7 @@
 package storage
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -18,13 +19,16 @@ type ContentLibrary struct {
 }
 
 type ContentMetadatum struct {
-	ID          int64
-	CreatedAt   time.Time
-	ContentID   int64
-	Title       string
-	Description string
-	PosterUrl   string
-	ReleaseDate time.Time
+	ID            int64
+	CreatedAt     time.Time
+	ContentID     int64
+	Title         string
+	Description   string
+	PosterUrl     string
+	ReleaseDate   time.Time
+	SeasonNumber  sql.NullInt64
+	EpisodeNumber sql.NullInt64
+	Type          string
 }
 
 type MediaLibrary struct {

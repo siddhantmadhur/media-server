@@ -51,6 +51,9 @@ CREATE TABLE IF NOT EXISTS content_metadata (
     description TEXT NOT NULL,
     poster_url TEXT NOT NULL,
     release_date TIMESTAMP NOT NULL,
+    season_number INTEGER,
+    episode_number INTEGER,
+    type TEXT NOT NULL,
     
     FOREIGN KEY(content_id) REFERENCES content_library(id),
     UNIQUE(content_id)

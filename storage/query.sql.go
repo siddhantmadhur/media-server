@@ -7,6 +7,7 @@ package storage
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -156,6 +157,40 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 	return i, err
 }
 
+const getContentInfo = `-- name: GetContentInfo :one
+select content_library.id, content_library.name, file_path, extension, device_path, media_type, content_metadata.id  from content_library
+left  join media_library
+on content_library.media_library_id = media_library.id
+left join content_metadata
+on content_metadata.content_id = content_library.id
+where content_library.id = ?
+`
+
+type GetContentInfoRow struct {
+	ID         int64
+	Name       string
+	FilePath   string
+	Extension  string
+	DevicePath sql.NullString
+	MediaType  sql.NullString
+	ID_2       sql.NullInt64
+}
+
+func (q *Queries) GetContentInfo(ctx context.Context, id int64) (GetContentInfoRow, error) {
+	row := q.db.QueryRowContext(ctx, getContentInfo, id)
+	var i GetContentInfoRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.FilePath,
+		&i.Extension,
+		&i.DevicePath,
+		&i.MediaType,
+		&i.ID_2,
+	)
+	return i, err
+}
+
 const getMediaLibrary = `-- name: GetMediaLibrary :one
 SELECT id, created_at, name, description, device_path, media_type, owner_id FROM media_library
 WHERE id = ?
@@ -242,9 +277,9 @@ func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {
 }
 
 const linkContentMetadata = `-- name: LinkContentMetadata :one
-INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date)
-VALUES (?, ?, ?, ?, ?, ?)
-RETURNING id, created_at, content_id, title, description, poster_url, release_date
+INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date, type)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING id, created_at, content_id, title, description, poster_url, release_date, season_number, episode_number, type
 `
 
 type LinkContentMetadataParams struct {
@@ -254,6 +289,7 @@ type LinkContentMetadataParams struct {
 	Description string
 	PosterUrl   string
 	ReleaseDate time.Time
+	Type        string
 }
 
 func (q *Queries) LinkContentMetadata(ctx context.Context, arg LinkContentMetadataParams) (ContentMetadatum, error) {
@@ -264,6 +300,7 @@ func (q *Queries) LinkContentMetadata(ctx context.Context, arg LinkContentMetada
 		arg.Description,
 		arg.PosterUrl,
 		arg.ReleaseDate,
+		arg.Type,
 	)
 	var i ContentMetadatum
 	err := row.Scan(
@@ -274,6 +311,9 @@ func (q *Queries) LinkContentMetadata(ctx context.Context, arg LinkContentMetada
 		&i.Description,
 		&i.PosterUrl,
 		&i.ReleaseDate,
+		&i.SeasonNumber,
+		&i.EpisodeNumber,
+		&i.Type,
 	)
 	return i, err
 }
