@@ -26,21 +26,21 @@ func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 	}
 	content := "#EXTM3U\n"
 	content += "#EXT-X-VERSION:3\n"
-	content += "#EXT-X-TARGETDURATION:2\n"
+	content += "#EXT-X-TARGETDURATION:5\n"
 	content += "#EXT-X-MEDIA-SEQUENCE:0\n"
 	content += "#EXT-X-PLAYLIST-TYPE:VOD\n"
 
 	idx := 0
 	for counter > 0.0 {
 		newTime := 0.0
-		if counter >= 2.0 {
-			newTime = 2.0
+		if counter >= 5.0 {
+			newTime = 5.0
 		} else {
 			newTime = counter
 		}
 		content += fmt.Sprintf("#EXTINF:%.6f,\n", newTime)
-
 		content += fmt.Sprintf("http://localhost:8080/media/%d/segment/stream%d.ts\n", mediaId, idx)
+		content += fmt.Sprintf("#EXT-X-DISCONTINUITY\n")
 		counter -= newTime
 		idx += 1
 	}
