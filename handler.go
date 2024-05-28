@@ -29,6 +29,9 @@ func handler(e *echo.Echo) {
 	// Streaming routes
 
 	var streamer media.MediaManager
+	var config config.Config
+	config.Read()
+	streamer.Config = &config
 	e.GET("/media/content/:mediaId", streamer.GetPlaylistFile)
-
+	e.GET("/media/:mediaId/segment/:segmentId", streamer.GetSegmentFile)
 }
