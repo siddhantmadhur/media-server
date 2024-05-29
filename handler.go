@@ -12,6 +12,8 @@ import (
 
 func handler(e *echo.Echo) {
 
+	var ffmpeg = media.NewFfmpeg("veryfast")
+
 	// Wizard routes
 	e.GET("/wizard/get-first-user", wizard.WizardMiddleware(wizard.GetUser))
 
@@ -32,6 +34,7 @@ func handler(e *echo.Echo) {
 	var config config.Config
 	config.Read()
 	streamer.Config = &config
+	streamer.FFMPEGProcess = &ffmpeg
 	e.GET("/media/content/:mediaId", streamer.GetPlaylistFile)
-	e.GET("/media/:mediaId/segment/:segmentId", streamer.GetSegmentFile)
+	e.GET("/media/:mediaId/segment/:segmentId", streamer.GetLiveStream)
 }

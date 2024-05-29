@@ -2,9 +2,11 @@ package media
 
 import (
 	"fmt"
+	"math"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func GetLengthOfFile(path string) (float64, error) {
@@ -33,8 +35,8 @@ func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 	idx := 0
 	for counter > 0.0 {
 		newTime := 0.0
-		if counter >= 5.0 {
-			newTime = 5.0
+		if counter >= 2.0 {
+			newTime = 2.0
 		} else {
 			newTime = counter
 		}
@@ -47,4 +49,14 @@ func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 
 	content += "#EXT-X-ENDLIST"
 	return content, nil
+}
+
+func getTimeStamp(timestamp int64) string {
+	currentTime := time.Duration(timestamp) * time.Second
+	hours := math.Floor(currentTime.Hours())
+	minutes := math.Floor(currentTime.Minutes()) - (hours * 60)
+	seconds := currentTime.Seconds() - (hours * 3600) - (minutes * 60)
+	formatTimestamp := fmt.Sprintf("%.2d:%.2d:%.2d", int(hours), int(minutes), int(seconds))
+
+	return formatTimestamp
 }

@@ -8,6 +8,20 @@ import (
 	"testing"
 )
 
+func TestTimestamp(t *testing.T) {
+
+	expected := []string{"00:06:32", "02:31:30"}
+	inputs := []int64{392, 9090}
+
+	for idx, input := range inputs {
+		got := getTimeStamp(input)
+		if expected[idx] != got {
+			fmt.Printf("Got: %s, Expected: %s\n", got, expected[idx])
+			t.FailNow()
+		}
+	}
+
+}
 func TestLengthOfFile(t *testing.T) {
 	homedir, _ := os.UserHomeDir()
 	// this is where i have my test footage located
