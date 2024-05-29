@@ -111,11 +111,13 @@ func CreateUser(c echo.Context) error {
 				return err
 			}
 			h := sha256.New()
-			hash := h.Sum([]byte(request.Password))
-			queries.UpdateAdminUser(context.Background(), storage.UpdateAdminUserParams{
+			h.Write([]byte(request.Password))
+			hash := base64.URLEncoding.EncodeToString(h.Sum(nil))
+			err = queries.UpdateAdminUser(context.Background(), storage.UpdateAdminUserParams{
 				Username: request.Username,
 				Password: string(hash),
 			})
+			return err
 		}
 		return c.NoContent(201)
 	}
