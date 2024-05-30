@@ -36,7 +36,10 @@ func (f *Ffmpeg) Start(playback int64, path string, transcodedPath string) {
 
 	f.Process = exec.Command("ffmpeg", "-ss", getTimeStamp(playback), "-i", path, "-preset", f.Settings.Preset, "-start_number", fmt.Sprint(playback/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", transcodedPath)
 
-	f.Process.Start()
+	err := f.Process.Start()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
 
 }
 
