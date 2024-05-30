@@ -1,5 +1,7 @@
 # Ocelot Media Server [W.I.P.]
 
+> This project is still in development and will be for a while. I am working on a roadmap that should give you insight into how long it will take to finish.
+
 ### Purpose
 A free and open-source alternative to Plex Media Server that should look *beautiful*
 
