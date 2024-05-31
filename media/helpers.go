@@ -20,7 +20,7 @@ func GetLengthOfFile(path string) (float64, error) {
 }
 
 // Returns content of m3u8 file as a string or error
-func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
+func CreatePlaylistHLSFile(path string, mediaId int, streamId string) (string, error) {
 	size, err := GetLengthOfFile(path)
 	counter := size
 	if err != nil {
@@ -28,7 +28,7 @@ func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 	}
 	content := "#EXTM3U\n"
 	content += "#EXT-X-VERSION:3\n"
-	content += "#EXT-X-TARGETDURATION:5\n"
+	content += "#EXT-X-TARGETDURATION:2\n"
 	content += "#EXT-X-MEDIA-SEQUENCE:0\n"
 	content += "#EXT-X-PLAYLIST-TYPE:VOD\n"
 
@@ -41,7 +41,7 @@ func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 			newTime = counter
 		}
 		content += fmt.Sprintf("#EXTINF:%.6f,\n", newTime)
-		content += fmt.Sprintf("http://localhost:8080/media/%d/segment/stream%d.ts\n", mediaId, idx)
+		content += fmt.Sprintf("/media/content/%d/%s/stream%d.ts\n", mediaId, streamId, idx)
 		content += fmt.Sprintf("#EXT-X-DISCONTINUITY\n")
 		counter -= newTime
 		idx += 1
