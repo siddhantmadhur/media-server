@@ -2,54 +2,68 @@ package media
 
 import (
 	"fmt"
+	"log"
+	"ocelot/config"
+	"os"
 	"os/exec"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 type Ffmpeg struct {
-	Mutex       *sync.Mutex
-	Process     *exec.Cmd
-	Settings    *Preferences
-	LastSegment int
+	lock                  sync.Mutex
+	Id                    string
+	Proc                  *exec.Cmd
+	Preset                string
+	CurrentPlaybackSecond int64
+	CurrentPath           string
+	TranscodePath         string
+	MediaId               int64
+	StreamUrl             string
 }
 
-type Preferences struct {
-	Preset string
-}
+func NewFfmpeg(preset string, sourcePath string, currentPlaybackSecond int64, c *config.Config, mediaId int64) (*Ffmpeg, error) {
+	if preset == "" {
+		preset = "veryfast"
+	}
 
-func NewFfmpeg(preset string) Ffmpeg {
-	var mu sync.Mutex
 	var ffmpeg = Ffmpeg{
-		Settings: &Preferences{
-			Preset: preset,
-		},
-		Mutex:   &mu,
-		Process: nil,
+		Id:                    uuid.NewString(),
+		Preset:                preset,
+		CurrentPlaybackSecond: currentPlaybackSecond,
+		CurrentPath:           sourcePath,
+		MediaId:               mediaId,
 	}
-	return ffmpeg
+
+	ffmpeg.TranscodePath = fmt.Sprintf("%s/%s", c.CacheDir, ffmpeg.Id)
+	ffmpeg.StreamUrl = fmt.Sprintf("/media/session/%s/master.m3u8", ffmpeg.Id)
+	err := os.MkdirAll(ffmpeg.TranscodePath, 0777)
+	if err != nil {
+		log.Printf("[ERROR]: %s\n", err.Error())
+		return &ffmpeg, err
+	}
+
+	return &ffmpeg, nil
 }
 
-func (f *Ffmpeg) Start(playback int64, path string, transcodedPath string) {
+func (f *Ffmpeg) Start() {
 	f.Stop()
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
+	f.lock.Lock()
+	defer f.lock.Unlock()
 
-	f.Process = exec.Command("ffmpeg", "-ss", getTimeStamp(playback), "-i", path, "-preset", f.Settings.Preset, "-start_number", fmt.Sprint(playback/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", transcodedPath)
+	f.Proc = exec.Command("ffmpeg", "-ss", getTimeStamp(f.CurrentPlaybackSecond), "-i", f.CurrentPath, "-preset", f.Preset, "-start_number", fmt.Sprint(f.CurrentPlaybackSecond/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", f.TranscodePath+"/master.m3u8")
 
-	err := f.Process.Start()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err.Error())
-	}
-
+	f.Proc.Run()
 }
 
 func (f *Ffmpeg) Stop() {
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
+	f.lock.Lock()
+	defer f.lock.Unlock()
 
-	if f.Process != nil {
-		f.Process.Process.Kill()
-		f.Process.Wait()
-		f.Process = nil
+	if f.Proc != nil {
+		f.Proc.Process.Kill()
+		f.Proc.Wait()
 	}
+
 }
