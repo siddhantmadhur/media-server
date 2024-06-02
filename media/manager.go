@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"ocelot/config"
 	"ocelot/storage"
+	"os"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -83,4 +84,22 @@ func (m *Manager) GetMasterPlaylist(c echo.Context) error {
 	}
 
 	return c.String(200, playlist)
+}
+
+// /media/:mediaId/streams/:sessionId/:segment/stream.ts
+func (m *Manager) GetStreamFile(c echo.Context) error {
+	sessionId := c.Param("sessionId")
+	segment := c.Param("segment")
+	session := m.Sessions[sessionId]
+
+	if session == nil {
+		return c.String(500, "Session not found")
+	}
+	path := fmt.Sprintf("%s/master%s.ts", session.TranscodePath, segment)
+	_, err := os.ReadFile(path)
+	if err != nil {
+	}
+
+	return c.File(path)
+
 }
