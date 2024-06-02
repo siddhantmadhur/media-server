@@ -58,3 +58,4 @@ CREATE TABLE IF NOT EXISTS content_metadata (
     FOREIGN KEY(content_id) REFERENCES content_library(id),
     UNIQUE(content_id)
 );
+

@@ -38,16 +38,17 @@ func handler(e *echo.Echo) {
 	config.Read()
 	streamer, err := media.NewManager(&config)
 	if err != nil {
-		log.Printf("[Error]: %s\n", err.Error())
+		log.Printf("[ERROR]: %s\n", err.Error())
 		os.Exit(1)
 	}
-	//streamer.FFMPEGProcess = &ffmpeg
+
 	// Creates the right m3u url for the playback client. i.e. what time to resume, subtitles to use etc.
-	e.POST("/media/:mediaId/playback/info", streamer.GetPlaybackInfo)
+	e.POST("/media/:mediaId/playback/info", auth.AuthenticateRoute(streamer.GetPlaybackInfo))
 
 	// Once the m3u8 url is made it will be in the format below
-	//e.GET("/media/content/:mediaId/:streamId/master.m3u8", streamer.GetPlaylistFile)
+	e.GET("/media/:mediaId/streams/:sessionId/master.m3u8", streamer.GetMasterPlaylist)
 
 	// The m3u8 will refer to segments from below
-	//e.GET("/media/content/:mediaId/:streamId/:segmentId", streamer.GetLiveStream)
+	// /media/:mediaId/streams/:sessionId/:segment/stream.ts
+	e.GET("/media/:mediaId/streams/:sessionId/:segment/stream.ts", streamer.GetStreamFile)
 }

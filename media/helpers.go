@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -47,7 +48,7 @@ func CreatePlaylistHLSFile(session *Ffmpeg) (string, error) {
 
 		///media/:mediaId/streams/:streamId/master.m3u8
 		content += fmt.Sprintf("#EXTINF:%.6f,\n", newTime)
-		content += fmt.Sprintf("/media/%d/streams/%s/%d/stream.ts\n", session.MediaId, session.Id, idx)
+		content += fmt.Sprintf("http://localhost:8080/media/%d/streams/%s/%d/stream.ts\n", session.MediaId, session.Id, idx)
 		content += fmt.Sprintf("#EXT-X-DISCONTINUITY\n")
 		counter -= newTime
 		idx += 1
@@ -65,4 +66,10 @@ func getTimeStamp(timestamp int64) string {
 	formatTimestamp := fmt.Sprintf("%.2d:%.2d:%.2d", int(hours), int(minutes), int(seconds))
 
 	return formatTimestamp
+}
+
+func doesSegmentExist(session *Ffmpeg, segment int64) bool {
+	path := fmt.Sprintf("%s/master%d.ts", session.TranscodePath, segment)
+	_, err := os.ReadFile(path)
+	return err == nil
 }

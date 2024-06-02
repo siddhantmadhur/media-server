@@ -69,3 +69,13 @@ func (f *Ffmpeg) Stop() {
 	}
 
 }
+
+func (f *Ffmpeg) SkipTo(segment int64) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+	if !doesSegmentExist(f, segment) {
+		f.Stop()
+		f.CurrentPlaybackSecond = segment * 2
+		f.Start()
+	}
+}
