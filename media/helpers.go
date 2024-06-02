@@ -1,6 +1,7 @@
 package media
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"os/exec"
@@ -20,8 +21,11 @@ func GetLengthOfFile(path string) (float64, error) {
 }
 
 // Returns content of m3u8 file as a string or error
-func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
-	size, err := GetLengthOfFile(path)
+func CreatePlaylistHLSFile(session *Ffmpeg) (string, error) {
+	if session == nil {
+		return "", errors.New("Session not found")
+	}
+	size, err := GetLengthOfFile(session.CurrentPath)
 	counter := size
 	if err != nil {
 		return "", err
@@ -40,8 +44,10 @@ func CreatePlaylistHLSFile(path string, mediaId int) (string, error) {
 		} else {
 			newTime = counter
 		}
+
+		///media/:mediaId/streams/:streamId/master.m3u8
 		content += fmt.Sprintf("#EXTINF:%.6f,\n", newTime)
-		content += fmt.Sprintf("http://localhost:8080/media/%d/segment/stream%d.ts\n", mediaId, idx)
+		content += fmt.Sprintf("/media/%d/streams/%s/%d/stream.ts\n", session.MediaId, session.Id, idx)
 		content += fmt.Sprintf("#EXT-X-DISCONTINUITY\n")
 		counter -= newTime
 		idx += 1

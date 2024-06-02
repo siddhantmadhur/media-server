@@ -68,3 +68,19 @@ func (m *Manager) GetPlaybackInfo(c echo.Context) error {
 
 	return c.JSON(201, response)
 }
+
+// /media/:mediaId/streams/:streamId/master.m3u8
+func (m *Manager) GetMasterPlaylist(c echo.Context) error {
+	sessionId := c.Param("sessionId")
+	session := m.Sessions[sessionId]
+	if session == nil {
+		return c.String(500, "Session not found")
+	}
+
+	playlist, err := CreatePlaylistHLSFile(session)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
+	return c.String(200, playlist)
+}

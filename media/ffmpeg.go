@@ -37,8 +37,10 @@ func NewFfmpeg(preset string, sourcePath string, currentPlaybackSecond int64, c 
 	}
 
 	ffmpeg.TranscodePath = fmt.Sprintf("%s/%s", c.CacheDir, ffmpeg.Id)
-	ffmpeg.StreamUrl = fmt.Sprintf("/media/session/%s/master.m3u8", ffmpeg.Id)
+	ffmpeg.StreamUrl = fmt.Sprintf("/media/%d/streams/%s/master.m3u8", ffmpeg.MediaId, ffmpeg.Id)
+
 	err := os.MkdirAll(ffmpeg.TranscodePath, 0777)
+
 	if err != nil {
 		log.Printf("[ERROR]: %s\n", err.Error())
 		return &ffmpeg, err
