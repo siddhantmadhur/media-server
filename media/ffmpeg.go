@@ -1,11 +1,15 @@
 package media
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"ocelot/config"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -21,6 +25,8 @@ type Ffmpeg struct {
 	TranscodePath         string
 	MediaId               int64
 	StreamUrl             string
+	CurrentBuffer         *bytes.Buffer
+	LastSegment           int
 }
 
 func NewFfmpeg(preset string, sourcePath string, currentPlaybackSecond int64, c *config.Config, mediaId int64) (*Ffmpeg, error) {
@@ -56,7 +62,19 @@ func (f *Ffmpeg) Start() {
 
 	f.Proc = exec.Command("ffmpeg", "-ss", getTimeStamp(f.CurrentPlaybackSecond), "-i", f.CurrentPath, "-preset", f.Preset, "-start_number", fmt.Sprint(f.CurrentPlaybackSecond/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", f.TranscodePath+"/master.m3u8")
 
-	f.Proc.Run()
+	if f.CurrentBuffer == nil {
+		var b bytes.Buffer
+		f.CurrentBuffer = &b
+	}
+
+	f.Proc.Stderr = io.MultiWriter(f.CurrentBuffer)
+
+	err := f.Proc.Start()
+	if err != nil {
+		log.Printf("[ERROR]: %s\n", err.Error())
+	}
+
+	go f.TrackSegmentList()
 }
 
 func (f *Ffmpeg) Stop() {
@@ -77,5 +95,33 @@ func (f *Ffmpeg) SkipTo(segment int64) {
 		f.Stop()
 		f.CurrentPlaybackSecond = segment * 2
 		f.Start()
+	}
+}
+
+func (f *Ffmpeg) TrackSegmentList() {
+	defer fmt.Printf("Go routine ended\n")
+	re, _ := regexp.Compile("master[0-9]+.ts")
+	num, _ := regexp.Compile("[0-9]+")
+	line := ""
+	for {
+		data, err := f.CurrentBuffer.ReadByte()
+		if err != nil {
+			if io.EOF != err {
+				panic(err)
+			}
+		}
+		if data == '\n' {
+			segmentFile := re.FindString(line)
+			if segmentFile != "" {
+				lastSegment := num.FindString(segmentFile)
+				if lastSegment != "" {
+					f.LastSegment, err = strconv.Atoi(lastSegment)
+					fmt.Printf("Last segment: %d\n", f.LastSegment)
+				}
+			}
+			line = ""
+		} else {
+			line += string(data)
+		}
 	}
 }

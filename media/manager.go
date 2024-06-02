@@ -6,7 +6,6 @@ import (
 	"ocelot/auth"
 	"ocelot/config"
 	"ocelot/storage"
-	"os"
 	"strconv"
 	"time"
 
@@ -96,22 +95,15 @@ func (m *Manager) GetStreamFile(c echo.Context) error {
 	segment := c.Param("segment")
 	session := m.Sessions[sessionId]
 	if session == nil {
-		segmentNo, err := strconv.Atoi(segment)
-		if err != nil {
-			return c.String(500, err.Error())
-		}
-		session.SkipTo(int64(segmentNo))
-		for !doesSegmentExist(session, int64(segmentNo)) {
-		}
+		return c.String(500, "Session does not exist")
+	}
+	segmentNo, err := strconv.Atoi(segment)
+	if err != nil {
+		return c.String(500, err.Error())
 	}
 	path := fmt.Sprintf("%s/master%s.ts", session.TranscodePath, segment)
-	_, err := os.ReadFile(path)
-	if err != nil {
-
-		// TODO: Skip ffmpeg ahead if user is seeking
-		time.Sleep(2 * time.Second)
+	if !doesSegmentExist(session, int64(segmentNo)) {
+		time.Sleep(time.Second)
 	}
-
 	return c.File(path)
-
 }
