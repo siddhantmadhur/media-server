@@ -21,12 +21,15 @@ type Ffmpeg struct {
 	Proc                  *exec.Cmd
 	Preset                string
 	CurrentPlaybackSecond int64
+	StopPlaybackSecond    int64
 	CurrentPath           string
 	TranscodePath         string
 	MediaId               int64
 	StreamUrl             string
 	CurrentBuffer         *bytes.Buffer
 	LastSegment           int
+	SegmentBuffer         *Segment
+	KillSignal            chan bool
 }
 
 func NewFfmpeg(preset string, sourcePath string, currentPlaybackSecond int64, c *config.Config, mediaId int64) (*Ffmpeg, error) {
@@ -44,6 +47,7 @@ func NewFfmpeg(preset string, sourcePath string, currentPlaybackSecond int64, c 
 
 	ffmpeg.TranscodePath = fmt.Sprintf("%s/%s", c.CacheDir, ffmpeg.Id)
 	ffmpeg.StreamUrl = fmt.Sprintf("/media/%d/streams/%s/master.m3u8", ffmpeg.MediaId, ffmpeg.Id)
+	ffmpeg.KillSignal = make(chan bool)
 
 	err := os.MkdirAll(ffmpeg.TranscodePath, 0777)
 
@@ -60,21 +64,21 @@ func (f *Ffmpeg) Start() {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	f.Proc = exec.Command("ffmpeg", "-ss", getTimeStamp(f.CurrentPlaybackSecond), "-i", f.CurrentPath, "-preset", f.Preset, "-start_number", fmt.Sprint(f.CurrentPlaybackSecond/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", f.TranscodePath+"/master.m3u8")
+	proc := exec.Command("ffmpeg", "-ss", getTimeStamp(f.CurrentPlaybackSecond), "-to", getTimeStamp(f.StopPlaybackSecond), "-i", f.CurrentPath, "-preset", f.Preset, "-start_number", fmt.Sprint(f.CurrentPlaybackSecond/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", f.TranscodePath+"/master.m3u8")
 
 	if f.CurrentBuffer == nil {
 		var b bytes.Buffer
 		f.CurrentBuffer = &b
 	}
 
-	f.Proc.Stderr = io.MultiWriter(f.CurrentBuffer)
+	proc.Stderr = io.MultiWriter(f.CurrentBuffer)
 
-	err := f.Proc.Start()
+	err := proc.Start()
 	if err != nil {
 		log.Printf("[ERROR]: %s\n", err.Error())
 	}
+	f.Proc = proc
 
-	go f.TrackSegmentList()
 }
 
 func (f *Ffmpeg) Stop() {
@@ -83,19 +87,8 @@ func (f *Ffmpeg) Stop() {
 
 	if f.Proc != nil {
 		f.Proc.Process.Kill()
-		f.Proc.Wait()
 	}
 
-}
-
-func (f *Ffmpeg) SkipTo(segment int64) {
-	f.lock.Lock()
-	defer f.lock.Unlock()
-	if !doesSegmentExist(f, segment) {
-		f.Stop()
-		f.CurrentPlaybackSecond = segment * 2
-		f.Start()
-	}
 }
 
 func (f *Ffmpeg) TrackSegmentList() {

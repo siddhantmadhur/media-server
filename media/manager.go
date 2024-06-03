@@ -3,10 +3,12 @@ package media
 import (
 	"context"
 	"fmt"
+	"math"
 	"ocelot/auth"
 	"ocelot/config"
 	"ocelot/storage"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -52,10 +54,23 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u auth.User) error {
 		return c.String(500, err.Error())
 	}
 
+	lengthOfFile, err := GetLengthOfFile(content.FilePath)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
 	ffmpeg, err := NewFfmpeg(request.Preset, content.FilePath, request.PlaybackSeconds, m.Config, int64(mediaId))
 	if err != nil {
 		return c.String(500, err.Error())
 	}
+
+	ffmpeg.StopPlaybackSecond = int64(math.Ceil(lengthOfFile))
+	var seg Segment
+	seg.StartSegment = ffmpeg.CurrentPlaybackSecond / 2
+	seg.EndSegment = ffmpeg.StopPlaybackSecond / 2
+	var lock sync.Mutex
+	seg.Lock = &lock
+	ffmpeg.SegmentBuffer = &seg
 
 	m.Sessions[ffmpeg.Id] = ffmpeg
 
@@ -70,6 +85,7 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u auth.User) error {
 	go ffmpeg.Start()
 	for !doesSegmentExist(ffmpeg, request.PlaybackSeconds/2) {
 	}
+	go ffmpeg.TrackSegmentList()
 	return c.JSON(201, response)
 }
 
@@ -94,6 +110,7 @@ func (m *Manager) GetStreamFile(c echo.Context) error {
 	sessionId := c.Param("sessionId")
 	segment := c.Param("segment")
 	session := m.Sessions[sessionId]
+	path := fmt.Sprintf("%s/master%s.ts", session.TranscodePath, segment)
 	if session == nil {
 		return c.String(500, "Session does not exist")
 	}
@@ -101,9 +118,13 @@ func (m *Manager) GetStreamFile(c echo.Context) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
-	path := fmt.Sprintf("%s/master%s.ts", session.TranscodePath, segment)
 	if !doesSegmentExist(session, int64(segmentNo)) {
-		time.Sleep(time.Second)
+		session.SkipTo(int64(segmentNo) * 2)
+		time.Sleep(time.Second * 2)
+		if doesSegmentExist(session, int64(segmentNo)) {
+			return c.File(path)
+		}
 	}
+
 	return c.File(path)
 }
