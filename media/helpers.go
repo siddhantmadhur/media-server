@@ -33,7 +33,7 @@ func CreatePlaylistHLSFile(session *Ffmpeg) (string, error) {
 	}
 	content := "#EXTM3U\n"
 	content += "#EXT-X-VERSION:3\n"
-	content += "#EXT-X-TARGETDURATION:5\n"
+	content += "#EXT-X-TARGETDURATION:2\n"
 	content += "#EXT-X-MEDIA-SEQUENCE:0\n"
 	content += "#EXT-X-PLAYLIST-TYPE:VOD\n"
 
@@ -49,7 +49,6 @@ func CreatePlaylistHLSFile(session *Ffmpeg) (string, error) {
 		///media/:mediaId/streams/:streamId/master.m3u8
 		content += fmt.Sprintf("#EXTINF:%.6f,\n", newTime)
 		content += fmt.Sprintf("http://localhost:8080/media/%d/streams/%s/%d/stream.ts\n", session.MediaId, session.Id, idx)
-		content += fmt.Sprintf("#EXT-X-DISCONTINUITY\n")
 		counter -= newTime
 		idx += 1
 	}
