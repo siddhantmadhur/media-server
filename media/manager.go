@@ -9,7 +9,6 @@ import (
 	"ocelot/storage"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -119,11 +118,7 @@ func (m *Manager) GetStreamFile(c echo.Context) error {
 		return c.String(500, err.Error())
 	}
 	if !doesSegmentExist(session, int64(segmentNo)) {
-		session.SkipTo(int64(segmentNo) * 2)
-		time.Sleep(time.Second * 2)
-		if doesSegmentExist(session, int64(segmentNo)) {
-			return c.File(path)
-		}
+		session.SkipTo(int64(segmentNo))
 	}
 
 	return c.File(path)
