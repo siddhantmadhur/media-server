@@ -46,10 +46,13 @@ func CreateUser(c echo.Context) error {
 		ConfirmPassword string `json:"confirmPassword"`
 	}
 
-	c.Bind(&request)
+	err := c.Bind(&request)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
 
 	var config config.Config
-	err := config.Read()
+	err = config.Read()
 	if err != nil {
 		return c.String(500, err.Error())
 	}
@@ -100,10 +103,12 @@ func CreateUser(c echo.Context) error {
 			}
 		} else {
 			if request.Password != request.ConfirmPassword {
-				return errors.New("Password does not match")
+				err = errors.New("Password does not match")
+				return c.String(500, err.Error())
 			}
-			if request.Username == "" {
-				return errors.New("Username is empty")
+			if len(request.Username) == 0 {
+				err = errors.New("Username is empty")
+				return c.String(500, err.Error())
 			}
 			conn, queries, err := storage.GetConn()
 			defer conn.Close()
@@ -117,7 +122,9 @@ func CreateUser(c echo.Context) error {
 				Username: request.Username,
 				Password: string(hash),
 			})
-			return err
+			if err != nil {
+				return c.String(500, err.Error())
+			}
 		}
 		return c.NoContent(201)
 	}

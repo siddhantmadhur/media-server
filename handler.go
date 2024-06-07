@@ -51,4 +51,6 @@ func handler(e *echo.Echo) {
 	// The m3u8 will refer to segments from below
 	// /media/:mediaId/streams/:sessionId/:segment/stream.ts
 	e.GET("/media/:mediaId/streams/:sessionId/:segment/stream.ts", streamer.GetStreamFile)
+
+	e.GET("/media/:mediaId/direct/:fileName", streamer.GetDirectPlayVideo)
 }

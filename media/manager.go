@@ -32,6 +32,7 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u auth.User) error {
 	var request struct {
 		Preset          string `json:"preset"`
 		PlaybackSeconds int64  `json:"playback_seconds"`
+		DirectPlay      bool   `json:"direct_play"`
 	}
 
 	c.Bind(&request)
@@ -51,6 +52,15 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u auth.User) error {
 	content, err := queries.GetContentInfo(context.Background(), int64(mediaId))
 	if err != nil {
 		return c.String(500, err.Error())
+	}
+	if request.DirectPlay {
+		var response = map[string]string{
+			"media_id":   fmt.Sprint(mediaId),
+			"stream_url": fmt.Sprintf("/media/%d/direct/stream.%s", mediaId, content.Extension),
+			"user_id":    fmt.Sprint(u.ID),
+		}
+
+		return c.JSON(200, response)
 	}
 
 	lengthOfFile, err := GetLengthOfFile(content.FilePath)
@@ -121,5 +131,31 @@ func (m *Manager) GetStreamFile(c echo.Context) error {
 		session.SkipTo(int64(segmentNo))
 	}
 
+	for !doesSegmentExist(session, int64(segmentNo)) {
+	}
+
 	return c.File(path)
+}
+
+// /media/:mediaId/direct/master.mp4?
+func (m *Manager) GetDirectPlayVideo(c echo.Context) error {
+
+	mediaId, err := strconv.Atoi(c.Param("mediaId"))
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
+	conn, queries, err := storage.GetConn()
+	defer conn.Close()
+
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
+	content, err := queries.GetContentInfo(context.Background(), int64(mediaId))
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
+	return c.File(content.FilePath)
 }

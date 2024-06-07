@@ -40,8 +40,8 @@ func CreatePlaylistHLSFile(session *Ffmpeg) (string, error) {
 	idx := 0
 	for counter > 0.0 {
 		newTime := 0.0
-		if counter >= 2.0 {
-			newTime = 2.0
+		if counter >= 2.002 {
+			newTime = 2.002
 		} else {
 			newTime = counter
 		}
