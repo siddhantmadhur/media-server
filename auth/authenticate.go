@@ -12,8 +12,15 @@ import (
 )
 
 // Use this middleware to authenticate routes
-func AuthenticateRoute(next RouteWithUser) echo.HandlerFunc {
+func AuthenticateRoute(next RouteWithUser, doOnWizard bool) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		var cfg config.Config
+		cfg.Read()
+
+		if !cfg.FinishedWizard && doOnWizard {
+			return next(c, nil)
+		}
+
 		authorization := c.Request().Header["Authorization"]
 		if len(authorization) != 1 {
 			return c.JSON(http.StatusUnauthorized, map[string]string{
@@ -51,8 +58,8 @@ func AuthenticateRoute(next RouteWithUser) echo.HandlerFunc {
 		user.SessionToken = data["session"].(string)
 		user.ExpiresAt = int64(claims["exp"].(float64))
 		user.JwtTokenString = bearerToken
-		return next(c, user)
+		return next(c, &user)
 	}
 }
 
-type RouteWithUser func(echo.Context, User) error
+type RouteWithUser func(echo.Context, *User) error

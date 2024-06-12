@@ -30,6 +30,6 @@ func Login(c echo.Context) error {
 	})
 }
 
-func GetUserInformation(c echo.Context, user User) error {
+func GetUserInformation(c echo.Context, user *User) error {
 	return c.JSON(200, user)
 }
