@@ -15,7 +15,8 @@ Reach full feature parity to Plex and possibly even Jellyfin.
         - [ ] Have customized permissions for each user
 - [ ] Encoding (ffmpeg)
     - [X] Generate .m3u8 file
-    - [X] Generate .ts files dynamically 
+    - [X] Generate .ts files dynamically
+    - [X] Direct Play
     - [ ] Thumbnails
     - [ ] Subtitles
 - [ ] Library
@@ -50,5 +51,8 @@ Not to say Jellyfin isn't an amazing project because it is and will be probably 
 I have worked on and tried to build a client for Jellyfin, which has taught me a lot about how media streaming but ultimately I believe I can make a viable alternative free of the tech debt from Emby/Jellyfin. Also, I don't have a lot of experience with C# and would personally like an alternative built in Go. 
 
 
-##### Development started on April 29, 2024, by Siddhant Madhur
+### Star History
 
+[![Star History Chart](https://api.star-history.com/svg?repos=siddhantmadhur/ocelot-media-server&type=Timeline)](https://star-history.com/#siddhantmadhur/ocelot-media-server&Timeline)
+
+##### Development started on April 29, 2024, by Siddhant Madhur
