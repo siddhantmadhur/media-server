@@ -12,12 +12,7 @@ type ServerInformation struct {
 	FinishedWizard  bool   `json:"finished_wizard"`
 }
 
-func getServerInformation() (ServerInformation, error) {
-	var config Config
-	err := config.Read()
-	if err != nil {
-		return ServerInformation{}, err
-	}
+func getServerInformation(c *Config) (ServerInformation, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return ServerInformation{}, err
@@ -26,7 +21,7 @@ func getServerInformation() (ServerInformation, error) {
 		Hostname:        hostname,
 		ServerVersion:   os.Getenv("ocelot_version"),
 		OperatingSystem: runtime.GOOS,
-		FinishedWizard:  config.FinishedWizard,
+		FinishedWizard:  c.FinishedWizard,
 	}, nil
 
 }

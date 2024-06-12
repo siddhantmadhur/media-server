@@ -30,6 +30,7 @@ type Ffmpeg struct {
 	LastSegment           int
 	SegmentBuffer         *Segment
 	KillSignal            chan bool
+	DirectPlay            bool
 }
 
 func NewFfmpeg(preset string, sourcePath string, currentPlaybackSecond int64, c *config.Config, mediaId int64) (*Ffmpeg, error) {
@@ -63,7 +64,7 @@ func (f *Ffmpeg) Start() {
 	f.Stop()
 	f.lock.Lock()
 	defer f.lock.Unlock()
-
+	// Add -c:v h264_videotoolbox for macos
 	proc := exec.Command("ffmpeg", "-ss", getTimeStamp(f.CurrentPlaybackSecond), "-to", getTimeStamp(f.StopPlaybackSecond), "-i", f.CurrentPath, "-preset", f.Preset, "-start_number", fmt.Sprint(f.CurrentPlaybackSecond/2), "-hls_playlist_type", "vod", "-force_key_frames", "expr:gte(t,n_forced*2.0000)", "-hls_time", "2", "-hls_list_size", "0", "-f", "hls", "-y", f.TranscodePath+"/master.m3u8")
 
 	if f.CurrentBuffer == nil {

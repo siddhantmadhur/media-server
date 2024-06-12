@@ -31,6 +31,9 @@ INSERT INTO media_library(created_at, name, description, device_path, media_type
 VALUES (?, ?, ?, ?, ?, ?)
 RETURNING *;
 
+-- name: GetAllMediaLibraries :many
+SELECT * FROM media_library;
+
 -- name: AddContent :one
 INSERT INTO content_library(created_at, file_path, media_library_id, extension, name)
 VALUES ( ?, ?, ?, ? , ?)

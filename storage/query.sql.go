@@ -157,6 +157,41 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 	return i, err
 }
 
+const getAllMediaLibraries = `-- name: GetAllMediaLibraries :many
+SELECT id, created_at, name, description, device_path, media_type, owner_id FROM media_library
+`
+
+func (q *Queries) GetAllMediaLibraries(ctx context.Context) ([]MediaLibrary, error) {
+	rows, err := q.db.QueryContext(ctx, getAllMediaLibraries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MediaLibrary
+	for rows.Next() {
+		var i MediaLibrary
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.Name,
+			&i.Description,
+			&i.DevicePath,
+			&i.MediaType,
+			&i.OwnerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getContentInfo = `-- name: GetContentInfo :one
 select content_library.id, content_library.name, file_path, extension, device_path, media_type, content_metadata.id  from content_library
 left  join media_library

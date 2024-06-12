@@ -24,7 +24,7 @@ func handler(e *echo.Echo) {
 	e.GET("/wizard/get-first-user", wizard.WizardMiddleware(wizard.GetUser))
 
 	// Server config
-	e.GET("/server/information", config.GetServerInformation)
+	e.GET("/server/information", cfg.GetServerInformation)
 	e.GET("/server/information/folders", auth.AuthenticateRoute(library.GetPathFolders, true))
 	e.POST("/server/information/wizard", cfg.Route(wizard.FinishWizard))
 

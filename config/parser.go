@@ -10,11 +10,11 @@ import (
 )
 
 type Config struct {
-	Port           int    `toml:"port"`
-	SecretKey      string `toml:"secret_key"`
-	FinishedWizard bool   `toml:"finished_wizard"`
-	CacheDir       string `toml:"cache_dir"`
-	Mutex          *sync.Mutex
+	Port           int         `toml:"port"`
+	SecretKey      string      `toml:"secret_key"`
+	FinishedWizard bool        `toml:"finished_wizard"`
+	CacheDir       string      `toml:"cache_dir"`
+	Mutex          *sync.Mutex `toml:"-"`
 }
 
 func (c *Config) Write() error {
@@ -22,11 +22,11 @@ func (c *Config) Write() error {
 	if err != nil {
 		return err
 	}
-	f, err := os.OpenFile(configDir+"/ocelot.toml", 0666, os.ModeAppend)
+	f, err := os.Create(configDir + "/ocelot.toml")
 	if err != nil {
 		return err
 	}
-	_, err = toml.NewDecoder(f).Decode(c)
+	err = toml.NewEncoder(f).Encode(c)
 	return err
 }
 

@@ -2,8 +2,8 @@ package config
 
 import "github.com/labstack/echo/v4"
 
-func GetServerInformation(c echo.Context) error {
-	serverInformation, err := getServerInformation()
+func (cfg *Config) GetServerInformation(c echo.Context) error {
+	serverInformation, err := getServerInformation(cfg)
 	if err != nil {
 		return err
 	}

@@ -27,7 +27,7 @@ func NewManager(cfg *config.Config) (*Manager, error) {
 }
 
 // /media/:mediaId/playback/info
-func (m *Manager) GetPlaybackInfo(c echo.Context, u auth.User) error {
+func (m *Manager) GetPlaybackInfo(c echo.Context, u *auth.User) error {
 
 	var request struct {
 		Preset          string `json:"preset"`

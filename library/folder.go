@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"ocelot/auth"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,7 +22,7 @@ func GetPathFolders(c echo.Context, u *auth.User) error {
 	}
 	var results = []map[string]string{}
 	for _, entry := range dir {
-		if entry.IsDir() {
+		if entry.IsDir() && strings.Index(entry.Name(), ".") != 0 {
 			results = append(results, map[string]string{
 				"name": entry.Name(),
 			})
