@@ -13,6 +13,8 @@ import (
 )
 
 func handler(e *echo.Echo) {
+	var cfg config.Config
+	cfg.Read()
 
 	e.Use(Logger)
 
@@ -24,6 +26,7 @@ func handler(e *echo.Echo) {
 	// Server config
 	e.GET("/server/information", config.GetServerInformation)
 	e.GET("/server/information/folders", auth.AuthenticateRoute(library.GetPathFolders, true))
+	e.POST("/server/information/wizard", cfg.Route(wizard.FinishWizard))
 
 	// Library
 	e.POST("/server/media/library", auth.AuthenticateRoute(library.AddLibraryFolder, true))
@@ -35,9 +38,7 @@ func handler(e *echo.Echo) {
 	e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
 
 	// Streaming routes
-	var config config.Config
-	config.Read()
-	streamer, err := media.NewManager(&config)
+	streamer, err := media.NewManager(&cfg)
 	if err != nil {
 		log.Printf("[ERROR]: %s\n", err.Error())
 		os.Exit(1)

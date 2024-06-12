@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"os"
+	"sync"
 
 	"github.com/BurntSushi/toml"
 )
@@ -13,6 +14,20 @@ type Config struct {
 	SecretKey      string `toml:"secret_key"`
 	FinishedWizard bool   `toml:"finished_wizard"`
 	CacheDir       string `toml:"cache_dir"`
+	Mutex          *sync.Mutex
+}
+
+func (c *Config) Write() error {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return err
+	}
+	f, err := os.OpenFile(configDir+"/ocelot.toml", 0666, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	_, err = toml.NewDecoder(f).Decode(c)
+	return err
 }
 
 func (c *Config) Read() error {
@@ -42,5 +57,7 @@ func (c *Config) Read() error {
 		return err
 	}
 	err = toml.Unmarshal(file, c)
+
+	c.Mutex = &sync.Mutex{}
 	return err
 }

@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"fmt"
 	"ocelot/auth"
 	"ocelot/storage"
 	"time"
@@ -9,7 +10,30 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func AddLibraryFolder(c echo.Context, u auth.User) error {
+func GetLibraryFolders(c echo.Context, u *auth.User) error {
+	conn, query, err := storage.GetConn()
+	defer conn.Close()
+
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+	libraries, err := query.GetAllMediaLibraries(context.Background())
+	var result []map[string]string
+	for _, library := range libraries {
+		result = append(result, map[string]string{
+			"id":          fmt.Sprint(library.ID),
+			"name":        library.Name,
+			"path":        library.DevicePath,
+			"description": library.Description,
+			"owner_uid":   fmt.Sprint(library.OwnerID),
+			"media_type":  library.MediaType,
+		})
+	}
+	return c.JSON(200, result)
+}
+
+func AddLibraryFolder(c echo.Context, u *auth.User) error {
+
 	var request struct {
 		Path        string `json:"path"`
 		Name        string `json:"name"`
@@ -28,8 +52,19 @@ func AddLibraryFolder(c echo.Context, u auth.User) error {
 	if err != nil {
 		return c.String(500, err.Error())
 	}
+	var userId int64
+	if u == nil {
+
+		user, err := queries.GetAdminUser(context.Background())
+		if err != nil {
+			return c.String(500, err.Error())
+		}
+		userId = user.ID
+	} else {
+		userId = u.ID
+	}
 	library, err := queries.CreateMediaLibrary(context.Background(), storage.CreateMediaLibraryParams{
-		OwnerID:     u.ID,
+		OwnerID:     userId,
 		Name:        request.Name,
 		DevicePath:  request.Path,
 		MediaType:   request.Type,

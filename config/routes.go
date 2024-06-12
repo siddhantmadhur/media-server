@@ -9,3 +9,11 @@ func GetServerInformation(c echo.Context) error {
 	}
 	return c.JSON(200, serverInformation)
 }
+
+func (cfg *Config) Route(next RouteWithConfig) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return next(c, cfg)
+	}
+}
+
+type RouteWithConfig func(echo.Context, *Config) error
