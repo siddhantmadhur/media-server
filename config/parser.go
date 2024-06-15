@@ -13,6 +13,7 @@ type Config struct {
 	Port           int         `toml:"port"`
 	SecretKey      string      `toml:"secret_key"`
 	FinishedWizard bool        `toml:"finished_wizard"`
+	PersistentDir  string      `toml:"persistent_dir"`
 	CacheDir       string      `toml:"cache_dir"`
 	Mutex          *sync.Mutex `toml:"-"`
 }
@@ -51,6 +52,7 @@ func (c *Config) Read() error {
 			Port:           8080,
 			SecretKey:      key.PublicKey.N.Text(62),
 			FinishedWizard: false,
+			PersistentDir:  "/data",
 		}
 		err = toml.NewEncoder(f).Encode(defaultConfig)
 		*c = defaultConfig
