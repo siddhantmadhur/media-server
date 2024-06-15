@@ -3,6 +3,7 @@ package library
 import (
 	"fmt"
 	"ocelot/auth"
+	"ocelot/config"
 	"os"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // /server/information/folders?directory=/users/...
-func GetPathFolders(c echo.Context, u *auth.User) error {
+func GetPathFolders(c echo.Context, u *auth.User, cfg *config.Config) error {
 	currentPath := c.QueryParam("directory")
 	if len(currentPath) == 0 {
 		currentPath = "/"

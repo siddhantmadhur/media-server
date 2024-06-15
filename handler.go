@@ -25,17 +25,17 @@ func handler(e *echo.Echo) {
 
 	// Server config
 	e.GET("/server/information", cfg.GetServerInformation)
-	e.GET("/server/information/folders", auth.AuthenticateRoute(library.GetPathFolders, true))
+	e.GET("/server/information/folders", auth.AuthenticateRoute(library.GetPathFolders, &cfg))
 	e.POST("/server/information/wizard", cfg.Route(wizard.FinishWizard))
 
 	// Library
-	e.POST("/server/media/library", auth.AuthenticateRoute(library.AddLibraryFolder, true))
-	e.GET("/server/media/library", auth.AuthenticateRoute(library.GetLibraryFolders, true))
+	e.POST("/server/media/library", auth.AuthenticateRoute(library.AddLibraryFolder, &cfg))
+	e.GET("/server/media/library", auth.AuthenticateRoute(library.GetLibraryFolders, &cfg))
 
 	// Auth routes
-	e.POST("/auth/login", auth.Login)
-	e.POST("/auth/create/user", auth.CreateUser)
-	e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
+	//e.POST("/auth/login", auth.Login)
+	//e.POST("/auth/create/user", auth.CreateUser)
+	//e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
 
 	// Streaming routes
 	streamer, err := media.NewManager(&cfg)
@@ -45,7 +45,7 @@ func handler(e *echo.Echo) {
 	}
 
 	// Creates the right m3u url for the playback client. i.e. what time to resume, subtitles to use etc.
-	e.POST("/media/:mediaId/playback/info", auth.AuthenticateRoute(streamer.GetPlaybackInfo, false))
+	e.POST("/media/:mediaId/playback/info", auth.AuthenticateRoute(streamer.GetPlaybackInfo, &cfg))
 
 	// Once the m3u8 url is made it will be in the format below
 	e.GET("/media/:mediaId/streams/:sessionId/master.m3u8", streamer.GetMasterPlaylist)

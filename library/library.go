@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"ocelot/auth"
+	"ocelot/config"
 	"ocelot/storage"
 	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
-func GetLibraryFolders(c echo.Context, u *auth.User) error {
+func GetLibraryFolders(c echo.Context, u *auth.User, cfg *config.Config) error {
 	conn, query, err := storage.GetConn()
 	defer conn.Close()
 
@@ -32,7 +33,7 @@ func GetLibraryFolders(c echo.Context, u *auth.User) error {
 	return c.JSON(200, result)
 }
 
-func AddLibraryFolder(c echo.Context, u *auth.User) error {
+func AddLibraryFolder(c echo.Context, u *auth.User, cfg *config.Config) error {
 
 	var request struct {
 		Path        string `json:"path"`
