@@ -353,18 +353,19 @@ func (q *Queries) LinkContentMetadata(ctx context.Context, arg LinkContentMetada
 	return i, err
 }
 
-const updateAdminUser = `-- name: UpdateAdminUser :exec
+const updateUser = `-- name: UpdateUser :exec
 UPDATE profiles 
 SET username = ?, password = ?
-WHERE type = 0
+WHERE id = ?
 `
 
-type UpdateAdminUserParams struct {
+type UpdateUserParams struct {
 	Username string
 	Password string
+	ID       int64
 }
 
-func (q *Queries) UpdateAdminUser(ctx context.Context, arg UpdateAdminUserParams) error {
-	_, err := q.db.ExecContext(ctx, updateAdminUser, arg.Username, arg.Password)
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser, arg.Username, arg.Password, arg.ID)
 	return err
 }

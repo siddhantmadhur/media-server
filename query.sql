@@ -12,10 +12,10 @@ VALUES ( ?, ?, ? );
 SELECT * FROM profiles
 WHERE type = 0;
 
--- name: UpdateAdminUser :exec
+-- name: UpdateUser :exec
 UPDATE profiles 
 SET username = ?, password = ?
-WHERE type = 0;
+WHERE id = ?; 
 
 -- name: GetUserWithPassword :one
 SELECT * FROM profiles 
