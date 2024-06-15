@@ -11,18 +11,17 @@ import (
 )
 
 func main() {
-
-	err := runSqliteInit()
-	if err != nil {
-		log.Fatal("There was an error in connecting to the sqlite file: " + err.Error())
-		os.Exit(1)
-	}
-
-	var config config.Config
-	err = config.Read()
+	var cfg config.Config
+	err := cfg.Read()
 
 	if err != nil {
 		log.Fatal("[ERROR]: Config could not be read. " + err.Error())
+		os.Exit(1)
+	}
+
+	err = runSqliteInit(&cfg)
+	if err != nil {
+		log.Fatal("There was an error in connecting to the sqlite file: " + err.Error())
 		os.Exit(1)
 	}
 
@@ -34,7 +33,7 @@ func main() {
 		AllowHeaders: []string{"Client-Name", "Content-Type", "Authorization"},
 	}))
 
-	handler(e)
+	handler(e, &cfg)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cfg.Port)))
 }

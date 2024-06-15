@@ -12,7 +12,7 @@ import (
 )
 
 func GetLibraryFolders(c echo.Context, u *auth.User, cfg *config.Config) error {
-	conn, query, err := storage.GetConn()
+	conn, query, err := storage.GetConn(cfg)
 	defer conn.Close()
 
 	if err != nil {
@@ -48,7 +48,7 @@ func AddLibraryFolder(c echo.Context, u *auth.User, cfg *config.Config) error {
 	if request.Path == "" {
 		return c.String(500, "Request is invalid: Path not mentioned.")
 	}
-	conn, queries, err := storage.GetConn()
+	conn, queries, err := storage.GetConn(cfg)
 	defer conn.Close()
 	if err != nil {
 		return c.String(500, err.Error())
@@ -76,7 +76,7 @@ func AddLibraryFolder(c echo.Context, u *auth.User, cfg *config.Config) error {
 		return c.String(500, err.Error())
 	}
 
-	go ScanLibrary(library.ID)
+	go ScanLibrary(library.ID, cfg)
 
 	return c.NoContent(201)
 }

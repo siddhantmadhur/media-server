@@ -53,6 +53,7 @@ func (c *Config) Read() error {
 			SecretKey:      key.PublicKey.N.Text(62),
 			FinishedWizard: false,
 			PersistentDir:  "/data",
+			Mutex:          &sync.Mutex{},
 		}
 		err = toml.NewEncoder(f).Encode(defaultConfig)
 		*c = defaultConfig

@@ -42,7 +42,7 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u *auth.User, cfg *config.Conf
 		return c.String(500, err.Error())
 	}
 
-	conn, queries, err := storage.GetConn()
+	conn, queries, err := storage.GetConn(cfg)
 	defer conn.Close()
 
 	if err != nil {
@@ -57,7 +57,7 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u *auth.User, cfg *config.Conf
 		var response = map[string]string{
 			"media_id":   fmt.Sprint(mediaId),
 			"stream_url": fmt.Sprintf("/media/%d/direct/stream.%s", mediaId, content.Extension),
-			"user_id":    fmt.Sprint(u.ID),
+			"user_id":    fmt.Sprint(u.UID),
 		}
 
 		return c.JSON(200, response)
@@ -88,7 +88,7 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u *auth.User, cfg *config.Conf
 		"media_id":   fmt.Sprint(mediaId),
 		"preset":     ffmpeg.Preset,
 		"stream_url": ffmpeg.StreamUrl,
-		"user_id":    fmt.Sprint(u.ID),
+		"user_id":    fmt.Sprint(u.UID),
 	}
 
 	go ffmpeg.Start()
@@ -138,14 +138,14 @@ func (m *Manager) GetStreamFile(c echo.Context) error {
 }
 
 // /media/:mediaId/direct/master.mp4?
-func (m *Manager) GetDirectPlayVideo(c echo.Context) error {
+func (m *Manager) GetDirectPlayVideo(c echo.Context, cfg *config.Config) error {
 
 	mediaId, err := strconv.Atoi(c.Param("mediaId"))
 	if err != nil {
 		return c.String(500, err.Error())
 	}
 
-	conn, queries, err := storage.GetConn()
+	conn, queries, err := storage.GetConn(cfg)
 	defer conn.Close()
 
 	if err != nil {

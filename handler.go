@@ -12,9 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func handler(e *echo.Echo) {
-	var cfg config.Config
-	cfg.Read()
+func handler(e *echo.Echo, cfg *config.Config) {
 
 	e.Use(Logger)
 
@@ -25,27 +23,27 @@ func handler(e *echo.Echo) {
 
 	// Server config
 	e.GET("/server/information", cfg.GetServerInformation)
-	e.GET("/server/information/folders", auth.AuthenticateOrWizard(library.GetPathFolders, &cfg))
+	e.GET("/server/information/folders", auth.AuthenticateOrWizard(library.GetPathFolders, cfg))
 	e.POST("/server/information/wizard", cfg.Route(wizard.FinishWizard))
 
 	// Library
-	e.POST("/server/media/library", auth.AuthenticateOrWizard(library.AddLibraryFolder, &cfg))
-	e.GET("/server/media/library", auth.AuthenticateOrWizard(library.GetLibraryFolders, &cfg))
+	e.POST("/server/media/library", auth.AuthenticateOrWizard(library.AddLibraryFolder, cfg))
+	e.GET("/server/media/library", auth.AuthenticateOrWizard(library.GetLibraryFolders, cfg))
 
 	// Auth routes
-	e.POST("/auth/create/user", auth.AuthenticateOrWizard(auth.CreateNewUserRoute, &cfg))
+	e.POST("/auth/create/user", auth.AuthenticateOrWizard(auth.CreateNewUserRoute, cfg))
 	//e.POST("/auth/login", auth.Login)
 	//e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
 
 	// Streaming routes
-	streamer, err := media.NewManager(&cfg)
+	streamer, err := media.NewManager(cfg)
 	if err != nil {
 		log.Printf("[ERROR]: %s\n", err.Error())
 		os.Exit(1)
 	}
 
 	// Creates the right m3u url for the playback client. i.e. what time to resume, subtitles to use etc.
-	e.POST("/media/:mediaId/playback/info", auth.AuthenticateRoute(streamer.GetPlaybackInfo, &cfg))
+	e.POST("/media/:mediaId/playback/info", auth.AuthenticateRoute(streamer.GetPlaybackInfo, cfg))
 
 	// Once the m3u8 url is made it will be in the format below
 	e.GET("/media/:mediaId/streams/:sessionId/master.m3u8", streamer.GetMasterPlaylist)
@@ -54,7 +52,7 @@ func handler(e *echo.Echo) {
 	// /media/:mediaId/streams/:sessionId/:segment/stream.ts
 	e.GET("/media/:mediaId/streams/:sessionId/:segment/stream.ts", streamer.GetStreamFile)
 
-	e.GET("/media/:mediaId/direct/:fileName", streamer.GetDirectPlayVideo)
+	e.GET("/media/:mediaId/direct/:fileName", cfg.Route(streamer.GetDirectPlayVideo))
 
 	e.GET("/server/streaming/sessions", streamer.GetAllSessions)
 }

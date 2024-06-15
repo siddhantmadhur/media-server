@@ -3,14 +3,15 @@ package library
 import (
 	"context"
 	"io/fs"
+	"ocelot/config"
 	"ocelot/storage"
 	"path/filepath"
 	"strings"
 	"time"
 )
 
-func ScanLibrary(mediaId int64) error {
-	conn, queries, err := storage.GetConn()
+func ScanLibrary(mediaId int64, cfg *config.Config) error {
+	conn, queries, err := storage.GetConn(cfg)
 	defer conn.Close()
 	if err != nil {
 		return err
@@ -26,11 +27,6 @@ func ScanLibrary(mediaId int64) error {
 			return err
 		}
 		if !d.IsDir() {
-			conn, queries, err := storage.GetConn()
-			defer conn.Close()
-			if err != nil {
-				return err
-			}
 			tokens := strings.Split(d.Name(), ".")
 			_, err = queries.AddContent(context.Background(), storage.AddContentParams{
 				CreatedAt:      time.Now(),

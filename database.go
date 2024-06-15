@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"ocelot/config"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,10 +13,10 @@ import (
 //go:embed schema.sql
 var ddl string
 
-func runSqliteInit() error {
+func runSqliteInit(cfg *config.Config) error {
 	ctx := context.Background()
-
-	db, err := sql.Open("sqlite3", "./storage.db")
+	os.MkdirAll(cfg.PersistentDir, 0755)
+	db, err := sql.Open("sqlite3", cfg.PersistentDir+"/storage.db")
 	defer db.Close()
 	_, err = db.ExecContext(ctx, ddl)
 	if err != nil {

@@ -26,6 +26,7 @@ func updateUser(userId int64, username string, password string, queries *storage
 	return err
 }
 
+// ADMIN FUNCTION: DO NOT USE DIRECTLY. Ensure user has correct rights before using.
 func createUser(username string, password string, queries *storage.Queries, perm int) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
@@ -52,7 +53,7 @@ func CreateNewUserRoute(c echo.Context, u *User, cfg *config.Config) error {
 		return c.JSON(401, result)
 	}
 
-	conn, query, err := storage.GetConn()
+	conn, query, err := storage.GetConn(cfg)
 	defer conn.Close()
 	if err != nil {
 		var result = map[string]string{
