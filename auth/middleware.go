@@ -13,3 +13,12 @@ func AuthenticateRoute(next authenticatedRoute, cfg *config.Config) echo.Handler
 		return next(c, nil, cfg)
 	}
 }
+
+func AuthenticateOrWizard(next authenticatedRoute, cfg *config.Config) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if !cfg.FinishedWizard {
+			return next(c, nil, cfg)
+		}
+		return AuthenticateRoute(next, cfg)(c)
+	}
+}

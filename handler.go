@@ -25,16 +25,16 @@ func handler(e *echo.Echo) {
 
 	// Server config
 	e.GET("/server/information", cfg.GetServerInformation)
-	e.GET("/server/information/folders", auth.AuthenticateRoute(library.GetPathFolders, &cfg))
+	e.GET("/server/information/folders", auth.AuthenticateOrWizard(library.GetPathFolders, &cfg))
 	e.POST("/server/information/wizard", cfg.Route(wizard.FinishWizard))
 
 	// Library
-	e.POST("/server/media/library", auth.AuthenticateRoute(library.AddLibraryFolder, &cfg))
-	e.GET("/server/media/library", auth.AuthenticateRoute(library.GetLibraryFolders, &cfg))
+	e.POST("/server/media/library", auth.AuthenticateOrWizard(library.AddLibraryFolder, &cfg))
+	e.GET("/server/media/library", auth.AuthenticateOrWizard(library.GetLibraryFolders, &cfg))
 
 	// Auth routes
+	e.POST("/auth/create/user", auth.AuthenticateOrWizard(auth.CreateNewUserRoute, &cfg))
 	//e.POST("/auth/login", auth.Login)
-	//e.POST("/auth/create/user", auth.CreateUser)
 	//e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
 
 	// Streaming routes
