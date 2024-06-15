@@ -2,11 +2,12 @@ package storage
 
 import (
 	"database/sql"
+	"ocelot/config"
 )
 
-func GetConn() (*sql.DB, *Queries, error) {
+func GetConn(cfg *config.Config) (*sql.DB, *Queries, error) {
 
-	db, err := sql.Open("sqlite3", "./storage.db")
+	db, err := sql.Open("sqlite3", cfg.PersistentDir+"/storage.db")
 	if err != nil {
 		return nil, nil, err
 	}
