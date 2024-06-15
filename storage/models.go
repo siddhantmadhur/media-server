@@ -44,7 +44,7 @@ type MediaLibrary struct {
 type Profile struct {
 	ID       int64
 	Username string
-	Password string
+	Password []byte
 	Type     int64
 }
 

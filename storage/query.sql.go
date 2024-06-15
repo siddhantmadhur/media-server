@@ -89,7 +89,7 @@ VALUES ( ?, ?, ? )
 
 type CreateProfileParams struct {
 	Username string
-	Password string
+	Password []byte
 	Type     int64
 }
 
@@ -278,18 +278,13 @@ func (q *Queries) GetProfiles(ctx context.Context) ([]GetProfilesRow, error) {
 	return items, nil
 }
 
-const getUserWithPassword = `-- name: GetUserWithPassword :one
+const getUserFromUsername = `-- name: GetUserFromUsername :one
 SELECT id, username, password, type FROM profiles 
-WHERE username = ? and password = ?
+WHERE username = ?
 `
 
-type GetUserWithPasswordParams struct {
-	Username string
-	Password string
-}
-
-func (q *Queries) GetUserWithPassword(ctx context.Context, arg GetUserWithPasswordParams) (Profile, error) {
-	row := q.db.QueryRowContext(ctx, getUserWithPassword, arg.Username, arg.Password)
+func (q *Queries) GetUserFromUsername(ctx context.Context, username string) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, getUserFromUsername, username)
 	var i Profile
 	err := row.Scan(
 		&i.ID,
@@ -361,7 +356,7 @@ WHERE id = ?
 
 type UpdateUserParams struct {
 	Username string
-	Password string
+	Password []byte
 	ID       int64
 }
 

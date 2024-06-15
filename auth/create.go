@@ -12,14 +12,14 @@ import (
 
 // ADMIN FUNCTION: DO NOT USE DIRECTLY. Ensure user has correct rights before using.
 func updateUser(userId int64, username string, password string, queries *storage.Queries) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 24)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		return err
 	}
 
 	err = queries.UpdateUser(context.Background(), storage.UpdateUserParams{
 		Username: username,
-		Password: string(hashedPassword),
+		Password: hashedPassword,
 		ID:       userId,
 	})
 
@@ -27,14 +27,14 @@ func updateUser(userId int64, username string, password string, queries *storage
 }
 
 func createUser(username string, password string, queries *storage.Queries, perm int) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 24)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		return err
 	}
 
 	err = queries.CreateProfile(context.Background(), storage.CreateProfileParams{
 		Username: username,
-		Password: string(hashedPassword),
+		Password: hashedPassword,
 		Type:     int64(perm),
 	})
 
@@ -117,7 +117,6 @@ func CreateNewUserRoute(c echo.Context, u *User, cfg *config.Config) error {
 			return c.JSON(403, result)
 		}
 	}
-
 	// Create new user
 	err = createUser(request.Username, request.Password, query, int(request.PermissionInt))
 	if err != nil {

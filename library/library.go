@@ -62,7 +62,7 @@ func AddLibraryFolder(c echo.Context, u *auth.User, cfg *config.Config) error {
 		}
 		userId = user.ID
 	} else {
-		userId = u.ID
+		userId = u.UID
 	}
 	library, err := queries.CreateMediaLibrary(context.Background(), storage.CreateMediaLibraryParams{
 		OwnerID:     userId,

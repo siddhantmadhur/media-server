@@ -17,9 +17,9 @@ UPDATE profiles
 SET username = ?, password = ?
 WHERE id = ?; 
 
--- name: GetUserWithPassword :one
+-- name: GetUserFromUsername :one
 SELECT * FROM profiles 
-WHERE username = ? and password = ?; 
+WHERE username = ?; 
 
 -- name: CreateSession :one
 INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, client_name, client_version)
