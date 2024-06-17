@@ -49,12 +49,15 @@ type Profile struct {
 }
 
 type Session struct {
-	ID            string
-	UserID        int64
-	CreatedAt     time.Time
-	ExpiresAt     time.Time
-	Device        string
-	DeviceName    string
-	ClientName    string
-	ClientVersion string
+	ID               string
+	UserID           int64
+	AccessToken      string
+	RefreshToken     string
+	CreatedAt        time.Time
+	AccessExpiresAt  time.Time
+	RefreshExpiresAt time.Time
+	Device           string
+	DeviceName       string
+	ClientName       string
+	ClientVersion    string
 }

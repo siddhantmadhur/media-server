@@ -22,8 +22,8 @@ SELECT * FROM profiles
 WHERE username = ?; 
 
 -- name: CreateSession :one
-INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, client_name, client_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO sessions (id, user_id, created_at, access_token, refresh_token, refresh_expires_at, access_expires_at, device, device_name, client_name, client_version)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *; 
 
 -- name: CreateMediaLibrary :one

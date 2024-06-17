@@ -32,7 +32,7 @@ func handler(e *echo.Echo, cfg *config.Config) {
 
 	// Auth routes
 	e.POST("/auth/create/user", auth.AuthenticateOrWizard(auth.CreateNewUserRoute, cfg))
-	//e.POST("/auth/login", auth.Login)
+	e.POST("/auth/login", cfg.Route(auth.Login))
 	//e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
 
 	// Streaming routes

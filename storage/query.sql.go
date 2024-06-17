@@ -99,20 +99,23 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) er
 }
 
 const createSession = `-- name: CreateSession :one
-INSERT INTO sessions (id, user_id, created_at, expires_at, device, device_name, client_name, client_version)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, user_id, created_at, expires_at, device, device_name, client_name, client_version
+INSERT INTO sessions (id, user_id, created_at, access_token, refresh_token, refresh_expires_at, access_expires_at, device, device_name, client_name, client_version)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, user_id, access_token, refresh_token, created_at, access_expires_at, refresh_expires_at, device, device_name, client_name, client_version
 `
 
 type CreateSessionParams struct {
-	ID            string
-	UserID        int64
-	CreatedAt     time.Time
-	ExpiresAt     time.Time
-	Device        string
-	DeviceName    string
-	ClientName    string
-	ClientVersion string
+	ID               string
+	UserID           int64
+	CreatedAt        time.Time
+	AccessToken      string
+	RefreshToken     string
+	RefreshExpiresAt time.Time
+	AccessExpiresAt  time.Time
+	Device           string
+	DeviceName       string
+	ClientName       string
+	ClientVersion    string
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
@@ -120,7 +123,10 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		arg.ID,
 		arg.UserID,
 		arg.CreatedAt,
-		arg.ExpiresAt,
+		arg.AccessToken,
+		arg.RefreshToken,
+		arg.RefreshExpiresAt,
+		arg.AccessExpiresAt,
 		arg.Device,
 		arg.DeviceName,
 		arg.ClientName,
@@ -130,8 +136,11 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.AccessToken,
+		&i.RefreshToken,
 		&i.CreatedAt,
-		&i.ExpiresAt,
+		&i.AccessExpiresAt,
+		&i.RefreshExpiresAt,
 		&i.Device,
 		&i.DeviceName,
 		&i.ClientName,

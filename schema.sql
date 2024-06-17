@@ -8,8 +8,11 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
+    access_expires_at TIMESTAMP NOT NULL,
+    refresh_expires_at TIMESTAMP NOT NULL,
     device TEXT NOT NULL,
     device_name TEXT NOT NULL,
     client_name TEXT NOT NULL,
