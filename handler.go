@@ -33,7 +33,7 @@ func handler(e *echo.Echo, cfg *config.Config) {
 	// Auth routes
 	e.POST("/auth/create/user", auth.AuthenticateOrWizard(auth.CreateNewUserRoute, cfg))
 	e.POST("/auth/login", cfg.Route(auth.Login))
-	//e.GET("/auth/get-user", auth.AuthenticateRoute(auth.GetUserInformation, false))
+	e.GET("/auth/user", auth.AuthenticateRoute(auth.GetUser, cfg))
 
 	// Streaming routes
 	streamer, err := media.NewManager(cfg)

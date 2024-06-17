@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"ocelot/config"
 	"ocelot/storage"
@@ -13,14 +14,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func generateToken(username string, secret string) (string, string, error) {
+func generateToken(user *storage.Profile, secret string) (string, string, error) {
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
+		"username": user.Username,
+		"uid":      fmt.Sprint(user.ID),
 		"exp":      time.Now().Add(time.Minute * 20).Unix(),
 	})
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
+		"username": user.Username,
+		"uid":      fmt.Sprint(user.ID),
 		"exp":      time.Now().Add(time.Hour * 300).Unix(),
 	})
 
@@ -70,7 +73,7 @@ func Login(c echo.Context, cfg *config.Config) error {
 		return c.JSON(http.StatusInternalServerError, result)
 	}
 
-	userId, err := comparePasswords(query, request.Username, request.Password)
+	user, err := comparePasswords(query, request.Username, request.Password)
 	if err != nil {
 		var result = map[string]string{
 			"message": "Password does not match or there was an error",
@@ -80,7 +83,7 @@ func Login(c echo.Context, cfg *config.Config) error {
 	}
 
 	// TODO: Create session/jwt whatever and send to the user
-	accessToken, refreshToken, err := generateToken(request.Username, cfg.SecretKey)
+	accessToken, refreshToken, err := generateToken(user, cfg.SecretKey)
 	if err != nil {
 		var result = map[string]string{
 			"message": "Could not generate JWT",
@@ -90,7 +93,7 @@ func Login(c echo.Context, cfg *config.Config) error {
 	}
 
 	// TODO: Change to device and client information
-	tokenInformation, err := storeToken(userId, accessToken, refreshToken, "", "", "", "", query)
+	tokenInformation, err := storeToken(user.ID, accessToken, refreshToken, "", "", "", "", query)
 	if err != nil {
 		var result = map[string]string{
 			"message": "Could not store token in database",
@@ -111,14 +114,14 @@ func Login(c echo.Context, cfg *config.Config) error {
 	return c.JSON(200, result)
 }
 
-func comparePasswords(query *storage.Queries, username string, password string) (int64, error) {
+func comparePasswords(query *storage.Queries, username string, password string) (*storage.Profile, error) {
 
 	user, err := query.GetUserFromUsername(context.Background(), username)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 
-	return user.ID, err
+	return &user, err
 }
