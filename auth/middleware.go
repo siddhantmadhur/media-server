@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"ocelot/config"
 	"strconv"
 
@@ -9,6 +10,15 @@ import (
 )
 
 type authenticatedRoute func(echo.Context, *User, *config.Config) error
+
+func getBearerTokenFromString(header string) (string, error) {
+	rawBearerToken := header
+	bearerToken := rawBearerToken[len("Bearer "):]
+	if len(bearerToken) == 0 {
+		return "", errors.New("Empty string provided")
+	}
+	return bearerToken, nil
+}
 
 // TODO: set permission level and profile picture
 func AuthenticateRoute(next authenticatedRoute, cfg *config.Config) echo.HandlerFunc {

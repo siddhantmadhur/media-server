@@ -93,21 +93,20 @@ func Login(c echo.Context, cfg *config.Config) error {
 	}
 
 	// TODO: Change to device and client information
-	tokenInformation, err := storeToken(user.ID, accessToken, refreshToken, "", "", "", "", query)
-	if err != nil {
-		var result = map[string]string{
-			"message": "Could not store token in database",
-			"error":   err.Error(),
-		}
-		return c.JSON(http.StatusInternalServerError, result)
-	}
+	//tokenInformation, err := storeToken(user.ID, accessToken, refreshToken, "", "", "", "", query)
+	//if err != nil {
+	//var result = map[string]string{
+	//"message": "Could not store token in database",
+	//"error":   err.Error(),
+	//	}
+	//	return c.JSON(http.StatusInternalServerError, result)
+	//}
 
 	var result = map[string]interface{}{
 		"message": "Login successful",
 		"data": map[string]string{
 			"access_token":  accessToken,
 			"refresh_token": refreshToken,
-			"session_id":    tokenInformation.ID,
 		},
 	}
 
