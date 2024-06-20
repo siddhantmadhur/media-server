@@ -12,6 +12,11 @@ import (
 
 func main() {
 	var cfg config.Config
+	if os.Getenv("PERSISTENT_DATA") != "" {
+		cfg.PersistentDir = os.Getenv("PERSISTENT_DATA")
+	} else {
+		cfg.PersistentDir = "/data"
+	}
 	err := cfg.Read()
 
 	if err != nil {

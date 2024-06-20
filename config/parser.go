@@ -19,11 +19,11 @@ type Config struct {
 }
 
 func (c *Config) Write() error {
-	configDir, err := os.UserConfigDir()
+	err := os.MkdirAll(c.PersistentDir, 0755)
 	if err != nil {
 		return err
 	}
-	f, err := os.Create(configDir + "/ocelot.toml")
+	f, err := os.Create(c.PersistentDir + "/config.toml")
 	if err != nil {
 		return err
 	}
@@ -32,18 +32,9 @@ func (c *Config) Write() error {
 }
 
 func (c *Config) Read() error {
-	configDir, err := os.UserConfigDir()
+	file, err := os.ReadFile(c.PersistentDir + "/config.toml")
 	if err != nil {
-		return err
-	}
-	file, err := os.ReadFile(configDir + "/ocelot.toml")
-	if err != nil {
-		err = nil
 		key, err := rsa.GenerateKey(rand.Reader, 32*8)
-		if err != nil {
-			return err
-		}
-		f, err := os.Create(configDir + "/ocelot.toml")
 		if err != nil {
 			return err
 		}
@@ -52,10 +43,15 @@ func (c *Config) Read() error {
 			Port:           8080,
 			SecretKey:      key.PublicKey.N.Text(62),
 			FinishedWizard: false,
-			PersistentDir:  "/data",
 			Mutex:          &sync.Mutex{},
 		}
-		err = toml.NewEncoder(f).Encode(defaultConfig)
+
+		if os.Getenv("PERSISTENT_DATA") != "" {
+			defaultConfig.PersistentDir = os.Getenv("PERSISTENT_DATA")
+		} else {
+			defaultConfig.PersistentDir = "/data"
+		}
+		err = defaultConfig.Write()
 		*c = defaultConfig
 		return err
 	}

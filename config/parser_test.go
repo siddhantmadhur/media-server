@@ -1,44 +1,66 @@
 package config
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"testing"
 )
 
-func TestNewConfig(t *testing.T) {
+func TestWrite(t *testing.T) {
 	// ensure no prexisting config
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		t.Errorf("ERROR: %s\n", err.Error())
-		t.FailNow()
-	}
-	os.Remove(configDir + "/ocelot.toml")
 
 	var config Config
+	tempDir := t.TempDir()
+	config.PersistentDir = tempDir + "/data"
+	config.Port = 8080
+	config.CacheDir = tempDir + "/cache"
 
-	err = config.Read()
-
+	err := config.Write()
 	if err != nil {
-		t.Errorf("ERROR: %s\n", err.Error())
+		log.Printf("[ERROR]: %s\n", err.Error())
 		t.FailNow()
 	}
-	if config.SecretKey == "" {
-		t.Errorf("ERROR: Secret key not generated correctly.\n")
+
+	f, err := os.ReadFile(tempDir + "/data/config.toml")
+	if err != nil {
+		log.Printf("[ERROR]: %s\n", err.Error())
+		t.FailNow()
+	}
+	expectedOutput := fmt.Sprintf(`port = 8080
+secret_key = ""
+finished_wizard = false
+persistent_dir = "%s/data"
+cache_dir = "%s/cache"
+`, tempDir, tempDir)
+	if string(f) != expectedOutput {
 		t.FailNow()
 	}
 }
 
-func TestPrexistingConfig(t *testing.T) {
-	var config Config
+func TestRead(t *testing.T) {
 
-	err := config.Read()
+	// Above test confirms functionality of Write()
+	var tempConfig Config
+	tempDir := t.TempDir()
+	tempConfig.PersistentDir = tempDir + "/data"
+	tempConfig.Port = 8080
+	tempConfig.CacheDir = tempDir + "/cache"
 
+	err := tempConfig.Write()
 	if err != nil {
-		t.Errorf("ERROR: %s\n", err.Error())
+		log.Printf("[ERROR]: %s\n", err.Error())
 		t.FailNow()
 	}
-	if config.SecretKey == "" {
-		t.Errorf("ERROR: Secret key not generated correctly.\n")
+
+	var cfg Config
+	cfg.PersistentDir = tempDir + "/data"
+	err = cfg.Read()
+	if err != nil {
+		log.Printf("[ERROR]: %s\n", err.Error())
+		t.FailNow()
+	}
+	if cfg.CacheDir != tempConfig.CacheDir || cfg.PersistentDir != tempConfig.PersistentDir || cfg.Port != tempConfig.Port {
 		t.FailNow()
 	}
 }
