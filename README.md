@@ -50,9 +50,4 @@ Not to say Jellyfin isn't an amazing project because it is and will be probably 
 #### Then why not just make a client for Jellyfin? 
 I have worked on and tried to build a client for Jellyfin, which has taught me a lot about how media streaming but ultimately I believe I can make a viable alternative free of the tech debt from Emby/Jellyfin. Also, I don't have a lot of experience with C# and would personally like an alternative built in Go. 
 
-
-### Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=siddhantmadhur/ocelot-media-server&type=Timeline)](https://star-history.com/#siddhantmadhur/ocelot-media-server&Timeline)
-
 ##### Development started on April 29, 2024, by Siddhant Madhur
