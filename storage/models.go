@@ -11,24 +11,17 @@ import (
 
 type ContentLibrary struct {
 	ID             int64
+	MediaLibraryID int64
 	CreatedAt      time.Time
 	FilePath       string
-	MediaLibraryID int64
 	Extension      string
 	Name           string
-}
-
-type ContentMetadatum struct {
-	ID            int64
-	CreatedAt     time.Time
-	ContentID     int64
-	Title         string
-	Description   string
-	PosterUrl     string
-	ReleaseDate   time.Time
-	SeasonNumber  sql.NullInt64
-	EpisodeNumber sql.NullInt64
-	Type          string
+	Title          string
+	Description    sql.NullString
+	CoverUrl       sql.NullString
+	SeasonNo       sql.NullInt64
+	EpisodeNo      sql.NullInt64
+	ImdbID         sql.NullInt64
 }
 
 type MediaLibrary struct {

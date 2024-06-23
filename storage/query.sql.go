@@ -11,38 +11,46 @@ import (
 	"time"
 )
 
-const addContent = `-- name: AddContent :one
-INSERT INTO content_library(created_at, file_path, media_library_id, extension, name)
-VALUES ( ?, ?, ?, ? , ?)
-RETURNING id, created_at, file_path, media_library_id, extension, name
+const addNewContentFile = `-- name: AddNewContentFile :exec
+INSERT INTO content_library (media_library_id,
+created_at,
+file_path,
+extension,
+name,
+title,
+description,
+cover_url,
+season_no,
+episode_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
-type AddContentParams struct {
+type AddNewContentFileParams struct {
+	MediaLibraryID int64
 	CreatedAt      time.Time
 	FilePath       string
-	MediaLibraryID int64
 	Extension      string
 	Name           string
+	Title          string
+	Description    sql.NullString
+	CoverUrl       sql.NullString
+	SeasonNo       sql.NullInt64
+	EpisodeNo      sql.NullInt64
 }
 
-func (q *Queries) AddContent(ctx context.Context, arg AddContentParams) (ContentLibrary, error) {
-	row := q.db.QueryRowContext(ctx, addContent,
+func (q *Queries) AddNewContentFile(ctx context.Context, arg AddNewContentFileParams) error {
+	_, err := q.db.ExecContext(ctx, addNewContentFile,
+		arg.MediaLibraryID,
 		arg.CreatedAt,
 		arg.FilePath,
-		arg.MediaLibraryID,
 		arg.Extension,
 		arg.Name,
+		arg.Title,
+		arg.Description,
+		arg.CoverUrl,
+		arg.SeasonNo,
+		arg.EpisodeNo,
 	)
-	var i ContentLibrary
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.FilePath,
-		&i.MediaLibraryID,
-		&i.Extension,
-		&i.Name,
-	)
-	return i, err
+	return err
 }
 
 const createMediaLibrary = `-- name: CreateMediaLibrary :one
@@ -202,22 +210,32 @@ func (q *Queries) GetAllMediaLibraries(ctx context.Context) ([]MediaLibrary, err
 }
 
 const getContentInfo = `-- name: GetContentInfo :one
-select content_library.id, content_library.name, file_path, extension, device_path, media_type, content_metadata.id  from content_library
-left  join media_library
+SELECT content_library.id, media_library_id, content_library.created_at, file_path, extension, content_library.name, title, content_library.description, cover_url, season_no, episode_no, imdb_id, media_library.id, media_library.created_at, media_library.name, media_library.description, device_path, media_type, owner_id FROM content_library
+left join media_library
 on content_library.media_library_id = media_library.id
-left join content_metadata
-on content_metadata.content_id = content_library.id
 where content_library.id = ?
 `
 
 type GetContentInfoRow struct {
-	ID         int64
-	Name       string
-	FilePath   string
-	Extension  string
-	DevicePath sql.NullString
-	MediaType  sql.NullString
-	ID_2       sql.NullInt64
+	ID             int64
+	MediaLibraryID int64
+	CreatedAt      time.Time
+	FilePath       string
+	Extension      string
+	Name           string
+	Title          string
+	Description    sql.NullString
+	CoverUrl       sql.NullString
+	SeasonNo       sql.NullInt64
+	EpisodeNo      sql.NullInt64
+	ImdbID         sql.NullInt64
+	ID_2           sql.NullInt64
+	CreatedAt_2    sql.NullTime
+	Name_2         sql.NullString
+	Description_2  sql.NullString
+	DevicePath     sql.NullString
+	MediaType      sql.NullString
+	OwnerID        sql.NullInt64
 }
 
 func (q *Queries) GetContentInfo(ctx context.Context, id int64) (GetContentInfoRow, error) {
@@ -225,12 +243,24 @@ func (q *Queries) GetContentInfo(ctx context.Context, id int64) (GetContentInfoR
 	var i GetContentInfoRow
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
+		&i.MediaLibraryID,
+		&i.CreatedAt,
 		&i.FilePath,
 		&i.Extension,
+		&i.Name,
+		&i.Title,
+		&i.Description,
+		&i.CoverUrl,
+		&i.SeasonNo,
+		&i.EpisodeNo,
+		&i.ImdbID,
+		&i.ID_2,
+		&i.CreatedAt_2,
+		&i.Name_2,
+		&i.Description_2,
 		&i.DevicePath,
 		&i.MediaType,
-		&i.ID_2,
+		&i.OwnerID,
 	)
 	return i, err
 }
@@ -313,48 +343,6 @@ func (q *Queries) IsFinishedSetup(ctx context.Context) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
-}
-
-const linkContentMetadata = `-- name: LinkContentMetadata :one
-INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date, type)
-VALUES (?, ?, ?, ?, ?, ?, ?)
-RETURNING id, created_at, content_id, title, description, poster_url, release_date, season_number, episode_number, type
-`
-
-type LinkContentMetadataParams struct {
-	CreatedAt   time.Time
-	ContentID   int64
-	Title       string
-	Description string
-	PosterUrl   string
-	ReleaseDate time.Time
-	Type        string
-}
-
-func (q *Queries) LinkContentMetadata(ctx context.Context, arg LinkContentMetadataParams) (ContentMetadatum, error) {
-	row := q.db.QueryRowContext(ctx, linkContentMetadata,
-		arg.CreatedAt,
-		arg.ContentID,
-		arg.Title,
-		arg.Description,
-		arg.PosterUrl,
-		arg.ReleaseDate,
-		arg.Type,
-	)
-	var i ContentMetadatum
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.ContentID,
-		&i.Title,
-		&i.Description,
-		&i.PosterUrl,
-		&i.ReleaseDate,
-		&i.SeasonNumber,
-		&i.EpisodeNumber,
-		&i.Type,
-	)
-	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :exec

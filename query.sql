@@ -34,24 +34,25 @@ RETURNING *;
 -- name: GetAllMediaLibraries :many
 SELECT * FROM media_library;
 
--- name: AddContent :one
-INSERT INTO content_library(created_at, file_path, media_library_id, extension, name)
-VALUES ( ?, ?, ?, ? , ?)
-RETURNING *;
+-- name: AddNewContentFile :exec
+INSERT INTO content_library (media_library_id,
+created_at,
+file_path,
+extension,
+name,
+title,
+description,
+cover_url,
+season_no,
+episode_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: LinkContentMetadata :one
-INSERT INTO content_metadata(created_at, content_id, title, description, poster_url, release_date, type)
-VALUES (?, ?, ?, ?, ?, ?, ?)
-RETURNING *;
+-- name: GetContentInfo :one
+SELECT * FROM content_library
+left join media_library
+on content_library.media_library_id = media_library.id
+where content_library.id = ?;
 
 -- name: GetMediaLibrary :one
 SELECT * FROM media_library
 WHERE id = ?;
 
--- name: GetContentInfo :one
-select content_library.id, content_library.name, file_path, extension, device_path, media_type, content_metadata.id  from content_library
-left  join media_library
-on content_library.media_library_id = media_library.id
-left join content_metadata
-on content_metadata.content_id = content_library.id
-where content_library.id = ?;

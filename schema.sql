@@ -36,29 +36,21 @@ CREATE TABLE IF NOT EXISTS media_library (
 
 CREATE TABLE IF NOT EXISTS content_library (
     id INTEGER PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    file_path TEXT NOT NULL,
     media_library_id INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    
+    file_path TEXT NOT NULL,
     extension TEXT NOT NULL,
     name TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    cover_url TEXT,
+    season_no INTEGER,
+    episode_no INTEGER,
+    imdb_id INTEGER,
 
     FOREIGN KEY(media_library_id) REFERENCES media_library(id),
     UNIQUE(file_path)
 );
 
-CREATE TABLE IF NOT EXISTS content_metadata (
-    id INTEGER PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    content_id INTEGER NOT NULL,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    poster_url TEXT NOT NULL,
-    release_date TIMESTAMP NOT NULL,
-    season_number INTEGER,
-    episode_number INTEGER,
-    type TEXT NOT NULL,
-    
-    FOREIGN KEY(content_id) REFERENCES content_library(id),
-    UNIQUE(content_id)
-);
 
