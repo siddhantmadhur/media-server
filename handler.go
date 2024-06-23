@@ -7,7 +7,6 @@ import (
 	"ocelot/library"
 	"ocelot/media"
 	"ocelot/wizard"
-	"os"
 
 	"github.com/labstack/echo/v4"
 )
@@ -39,8 +38,7 @@ func handler(e *echo.Echo, cfg *config.Config) {
 	// Streaming routes
 	streamer, err := media.NewManager(cfg)
 	if err != nil {
-		log.Printf("[ERROR]: %s\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("[ERROR]: %s\n", err.Error())
 	}
 
 	// Creates the right m3u url for the playback client. i.e. what time to resume, subtitles to use etc.
