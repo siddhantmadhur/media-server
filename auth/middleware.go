@@ -29,7 +29,7 @@ func AuthenticateRoute(next authenticatedRoute, cfg *config.Config) echo.Handler
 			var result = map[string]string{
 				"message": "Authoriation token not provided",
 			}
-			return c.JSON(401, result)
+			return c.JSON(500, result)
 		}
 		token, err := jwt.Parse(bearerToken, func(t *jwt.Token) (interface{}, error) {
 			return []byte(cfg.SecretKey), nil
@@ -39,7 +39,7 @@ func AuthenticateRoute(next authenticatedRoute, cfg *config.Config) echo.Handler
 				"message": "Authoriation token not provided",
 				"error":   err.Error(),
 			}
-			return c.JSON(500, result)
+			return c.JSON(401, result)
 		}
 		if !token.Valid {
 			var result = map[string]string{
