@@ -56,3 +56,9 @@ where content_library.id = ?;
 SELECT * FROM media_library
 WHERE id = ?;
 
+-- name: GetAllContentFiles :many
+SELECT * FROM content_library
+LEFT JOIN media_library
+ON media_library.id = content_library.media_library_id
+WHERE media_library_id = ?;
+

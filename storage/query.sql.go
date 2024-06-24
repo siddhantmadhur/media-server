@@ -174,6 +174,78 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 	return i, err
 }
 
+const getAllContentFiles = `-- name: GetAllContentFiles :many
+SELECT content_library.id, media_library_id, content_library.created_at, file_path, extension, content_library.name, title, content_library.description, cover_url, season_no, episode_no, imdb_id, media_library.id, media_library.created_at, media_library.name, media_library.description, device_path, media_type, owner_id FROM content_library
+LEFT JOIN media_library
+ON media_library.id = content_library.media_library_id
+WHERE media_library_id = ?
+`
+
+type GetAllContentFilesRow struct {
+	ID             int64
+	MediaLibraryID int64
+	CreatedAt      time.Time
+	FilePath       string
+	Extension      string
+	Name           string
+	Title          string
+	Description    sql.NullString
+	CoverUrl       sql.NullString
+	SeasonNo       sql.NullInt64
+	EpisodeNo      sql.NullInt64
+	ImdbID         sql.NullInt64
+	ID_2           sql.NullInt64
+	CreatedAt_2    sql.NullTime
+	Name_2         sql.NullString
+	Description_2  sql.NullString
+	DevicePath     sql.NullString
+	MediaType      sql.NullString
+	OwnerID        sql.NullInt64
+}
+
+func (q *Queries) GetAllContentFiles(ctx context.Context, mediaLibraryID int64) ([]GetAllContentFilesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllContentFiles, mediaLibraryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllContentFilesRow
+	for rows.Next() {
+		var i GetAllContentFilesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.MediaLibraryID,
+			&i.CreatedAt,
+			&i.FilePath,
+			&i.Extension,
+			&i.Name,
+			&i.Title,
+			&i.Description,
+			&i.CoverUrl,
+			&i.SeasonNo,
+			&i.EpisodeNo,
+			&i.ImdbID,
+			&i.ID_2,
+			&i.CreatedAt_2,
+			&i.Name_2,
+			&i.Description_2,
+			&i.DevicePath,
+			&i.MediaType,
+			&i.OwnerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllMediaLibraries = `-- name: GetAllMediaLibraries :many
 SELECT id, created_at, name, description, device_path, media_type, owner_id FROM media_library
 `
