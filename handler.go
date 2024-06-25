@@ -28,6 +28,7 @@ func handler(e *echo.Echo, cfg *config.Config) {
 	// Library
 	e.POST("/server/media/library", auth.AuthenticateOrWizard(library.AddLibraryFolder, cfg))
 	e.GET("/server/media/library", auth.AuthenticateOrWizard(library.GetLibraryFolders, cfg))
+	e.GET("/media/library/content", cfg.Route(library.GetContentFromLibrary))
 
 	// Auth routes
 	e.POST("/auth/create/user", auth.AuthenticateOrWizard(auth.CreateNewUserRoute, cfg))

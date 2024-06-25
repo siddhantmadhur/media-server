@@ -6,7 +6,11 @@ import (
 	"errors"
 	"io/fs"
 	"ocelot/config"
+	"ocelot/content"
+	"ocelot/content/tmdb"
+	"ocelot/content/types"
 	"ocelot/storage"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -44,15 +48,40 @@ func ScanLibrary(mediaId int64, cfg *config.Config) error {
 				if err != nil {
 					return nil
 				}
+				client, err := content.NewClient(tmdb.Client{
+					ApiKey: os.Getenv("TMDB_READ_TOKEN"),
+				})
+				if err != nil {
+					return err
+				}
+
+				res, err := client.SearchShows(types.SearchParam{
+					Query: showName,
+				})
+				if err != nil {
+					return err
+				}
+
+				var title = showName
+				var description, coverUrl string
+				if len(res.Results) > 0 {
+					topShow := res.Results[0]
+					title = topShow.Name
+					description = topShow.Overview
+					coverUrl = topShow.PosterPath
+				}
+
 				err = queries.AddNewContentFile(context.Background(), storage.AddNewContentFileParams{
 					MediaLibraryID: mediaId,
 					CreatedAt:      time.Now(),
 					FilePath:       path,
 					Extension:      tokens[len(tokens)-1],
 					Name:           strings.Join(tokens[:len(tokens)-1], "."),
-					Title:          showName,
+					Title:          title,
 					SeasonNo:       sql.NullInt64{Int64: int64(season), Valid: true},
 					EpisodeNo:      sql.NullInt64{Int64: int64(epsiode), Valid: true},
+					Description:    sql.NullString{String: description, Valid: true},
+					CoverUrl:       sql.NullString{String: coverUrl, Valid: true},
 				})
 			} else if library.MediaType == "movies" {
 				err = queries.AddNewContentFile(context.Background(), storage.AddNewContentFileParams{
