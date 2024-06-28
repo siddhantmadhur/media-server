@@ -51,3 +51,11 @@ type SearchParam struct {
 	Query string `json:"query"`
 	Year  int32  `json:"year"`
 }
+
+type SeriesDetails struct {
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Overview     string `json:"overview"`
+	PosterPath   string `json:"poster_path"`
+	SeasonNumber int    `json:"season_number"`
+}

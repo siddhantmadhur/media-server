@@ -35,3 +35,18 @@ func (t Client) SearchShows(param types.SearchParam) (types.ShowSearchResponse, 
 
 	return response, nil
 }
+
+func (t Client) GetSeasonInformation(seriesId int, seasonNo int) (types.SeriesDetails, error) {
+
+	var response types.SeriesDetails
+
+	err := t.Fetch(types.FetchParams{
+		Endpoint: fmt.Sprintf("/tv/%d/season/%d", seriesId, seasonNo),
+	}, &response)
+
+	if err != nil {
+		return types.SeriesDetails{}, err
+	}
+
+	return response, nil
+}
