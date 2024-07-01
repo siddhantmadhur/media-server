@@ -11,46 +11,71 @@ import (
 	"time"
 )
 
-const addNewContentFile = `-- name: AddNewContentFile :exec
-INSERT INTO content_library (media_library_id,
-created_at,
-file_path,
-extension,
-name,
-title,
-description,
-cover_url,
-season_no,
-episode_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+const addNewContentFile = `-- name: AddNewContentFile :one
+INSERT INTO content_library (
+    media_library_id,
+    created_at,
+    file_path,
+    name,
+    media_title,
+    description,
+    cover_url,
+    parent_id,
+    external_provider,
+    external_provider_id,
+    media_type,
+    classifier
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, media_library_id, created_at, file_path, name, media_title, description, cover_url, parent_id, classifier, media_type, external_provider, external_provider_id
 `
 
 type AddNewContentFileParams struct {
-	MediaLibraryID int64
-	CreatedAt      time.Time
-	FilePath       string
-	Extension      string
-	Name           string
-	Title          string
-	Description    sql.NullString
-	CoverUrl       sql.NullString
-	SeasonNo       sql.NullInt64
-	EpisodeNo      sql.NullInt64
+	MediaLibraryID     int64
+	CreatedAt          time.Time
+	FilePath           string
+	Name               string
+	MediaTitle         string
+	Description        sql.NullString
+	CoverUrl           sql.NullString
+	ParentID           sql.NullInt64
+	ExternalProvider   sql.NullString
+	ExternalProviderID sql.NullInt64
+	MediaType          string
+	Classifier         string
 }
 
-func (q *Queries) AddNewContentFile(ctx context.Context, arg AddNewContentFileParams) error {
-	_, err := q.db.ExecContext(ctx, addNewContentFile,
+func (q *Queries) AddNewContentFile(ctx context.Context, arg AddNewContentFileParams) (ContentLibrary, error) {
+	row := q.db.QueryRowContext(ctx, addNewContentFile,
 		arg.MediaLibraryID,
 		arg.CreatedAt,
 		arg.FilePath,
-		arg.Extension,
 		arg.Name,
-		arg.Title,
+		arg.MediaTitle,
 		arg.Description,
 		arg.CoverUrl,
-		arg.SeasonNo,
-		arg.EpisodeNo,
+		arg.ParentID,
+		arg.ExternalProvider,
+		arg.ExternalProviderID,
+		arg.MediaType,
+		arg.Classifier,
 	)
-	return err
+	var i ContentLibrary
+	err := row.Scan(
+		&i.ID,
+		&i.MediaLibraryID,
+		&i.CreatedAt,
+		&i.FilePath,
+		&i.Name,
+		&i.MediaTitle,
+		&i.Description,
+		&i.CoverUrl,
+		&i.ParentID,
+		&i.Classifier,
+		&i.MediaType,
+		&i.ExternalProvider,
+		&i.ExternalProviderID,
+	)
+	return i, err
 }
 
 const createMediaLibrary = `-- name: CreateMediaLibrary :one
@@ -175,32 +200,33 @@ func (q *Queries) GetAdminUser(ctx context.Context) (Profile, error) {
 }
 
 const getAllContentFiles = `-- name: GetAllContentFiles :many
-SELECT content_library.id, media_library_id, content_library.created_at, file_path, extension, content_library.name, title, content_library.description, cover_url, season_no, episode_no, imdb_id, media_library.id, media_library.created_at, media_library.name, media_library.description, device_path, media_type, owner_id FROM content_library
+SELECT content_library.id, media_library_id, content_library.created_at, file_path, content_library.name, media_title, content_library.description, cover_url, parent_id, classifier, content_library.media_type, external_provider, external_provider_id, media_library.id, media_library.created_at, media_library.name, media_library.description, device_path, media_library.media_type, owner_id FROM content_library
 LEFT JOIN media_library
 ON media_library.id = content_library.media_library_id
 WHERE media_library_id = ?
 `
 
 type GetAllContentFilesRow struct {
-	ID             int64
-	MediaLibraryID int64
-	CreatedAt      time.Time
-	FilePath       string
-	Extension      string
-	Name           string
-	Title          string
-	Description    sql.NullString
-	CoverUrl       sql.NullString
-	SeasonNo       sql.NullInt64
-	EpisodeNo      sql.NullInt64
-	ImdbID         sql.NullInt64
-	ID_2           sql.NullInt64
-	CreatedAt_2    sql.NullTime
-	Name_2         sql.NullString
-	Description_2  sql.NullString
-	DevicePath     sql.NullString
-	MediaType      sql.NullString
-	OwnerID        sql.NullInt64
+	ID                 int64
+	MediaLibraryID     int64
+	CreatedAt          time.Time
+	FilePath           string
+	Name               string
+	MediaTitle         string
+	Description        sql.NullString
+	CoverUrl           sql.NullString
+	ParentID           sql.NullInt64
+	Classifier         string
+	MediaType          string
+	ExternalProvider   sql.NullString
+	ExternalProviderID sql.NullInt64
+	ID_2               sql.NullInt64
+	CreatedAt_2        sql.NullTime
+	Name_2             sql.NullString
+	Description_2      sql.NullString
+	DevicePath         sql.NullString
+	MediaType_2        sql.NullString
+	OwnerID            sql.NullInt64
 }
 
 func (q *Queries) GetAllContentFiles(ctx context.Context, mediaLibraryID int64) ([]GetAllContentFilesRow, error) {
@@ -217,20 +243,21 @@ func (q *Queries) GetAllContentFiles(ctx context.Context, mediaLibraryID int64) 
 			&i.MediaLibraryID,
 			&i.CreatedAt,
 			&i.FilePath,
-			&i.Extension,
 			&i.Name,
-			&i.Title,
+			&i.MediaTitle,
 			&i.Description,
 			&i.CoverUrl,
-			&i.SeasonNo,
-			&i.EpisodeNo,
-			&i.ImdbID,
+			&i.ParentID,
+			&i.Classifier,
+			&i.MediaType,
+			&i.ExternalProvider,
+			&i.ExternalProviderID,
 			&i.ID_2,
 			&i.CreatedAt_2,
 			&i.Name_2,
 			&i.Description_2,
 			&i.DevicePath,
-			&i.MediaType,
+			&i.MediaType_2,
 			&i.OwnerID,
 		); err != nil {
 			return nil, err
@@ -281,33 +308,86 @@ func (q *Queries) GetAllMediaLibraries(ctx context.Context) ([]MediaLibrary, err
 	return items, nil
 }
 
+const getContentFromExternalId = `-- name: GetContentFromExternalId :one
+SELECT id, media_library_id, created_at, file_path, name, media_title, description, cover_url, parent_id, classifier, media_type, external_provider, external_provider_id FROM content_library
+WHERE external_provider_id = ?
+`
+
+func (q *Queries) GetContentFromExternalId(ctx context.Context, externalProviderID sql.NullInt64) (ContentLibrary, error) {
+	row := q.db.QueryRowContext(ctx, getContentFromExternalId, externalProviderID)
+	var i ContentLibrary
+	err := row.Scan(
+		&i.ID,
+		&i.MediaLibraryID,
+		&i.CreatedAt,
+		&i.FilePath,
+		&i.Name,
+		&i.MediaTitle,
+		&i.Description,
+		&i.CoverUrl,
+		&i.ParentID,
+		&i.Classifier,
+		&i.MediaType,
+		&i.ExternalProvider,
+		&i.ExternalProviderID,
+	)
+	return i, err
+}
+
+const getContentFromPath = `-- name: GetContentFromPath :one
+SELECT id, media_library_id, created_at, file_path, name, media_title, description, cover_url, parent_id, classifier, media_type, external_provider, external_provider_id FROM content_library
+WHERE file_path = ?
+`
+
+func (q *Queries) GetContentFromPath(ctx context.Context, filePath string) (ContentLibrary, error) {
+	row := q.db.QueryRowContext(ctx, getContentFromPath, filePath)
+	var i ContentLibrary
+	err := row.Scan(
+		&i.ID,
+		&i.MediaLibraryID,
+		&i.CreatedAt,
+		&i.FilePath,
+		&i.Name,
+		&i.MediaTitle,
+		&i.Description,
+		&i.CoverUrl,
+		&i.ParentID,
+		&i.Classifier,
+		&i.MediaType,
+		&i.ExternalProvider,
+		&i.ExternalProviderID,
+	)
+	return i, err
+}
+
 const getContentInfo = `-- name: GetContentInfo :one
-SELECT content_library.id, media_library_id, content_library.created_at, file_path, extension, content_library.name, title, content_library.description, cover_url, season_no, episode_no, imdb_id, media_library.id, media_library.created_at, media_library.name, media_library.description, device_path, media_type, owner_id FROM content_library
+SELECT content_library.id, media_library_id, content_library.created_at, file_path, content_library.name, media_title, content_library.description, cover_url, parent_id, classifier, content_library.media_type, external_provider, external_provider_id, media_library.id, media_library.created_at, media_library.name, media_library.description, device_path, media_library.media_type, owner_id FROM content_library
 left join media_library
 on content_library.media_library_id = media_library.id
 where content_library.id = ?
 `
 
 type GetContentInfoRow struct {
-	ID             int64
-	MediaLibraryID int64
-	CreatedAt      time.Time
-	FilePath       string
-	Extension      string
-	Name           string
-	Title          string
-	Description    sql.NullString
-	CoverUrl       sql.NullString
-	SeasonNo       sql.NullInt64
-	EpisodeNo      sql.NullInt64
-	ImdbID         sql.NullInt64
-	ID_2           sql.NullInt64
-	CreatedAt_2    sql.NullTime
-	Name_2         sql.NullString
-	Description_2  sql.NullString
-	DevicePath     sql.NullString
-	MediaType      sql.NullString
-	OwnerID        sql.NullInt64
+	ID                 int64
+	MediaLibraryID     int64
+	CreatedAt          time.Time
+	FilePath           string
+	Name               string
+	MediaTitle         string
+	Description        sql.NullString
+	CoverUrl           sql.NullString
+	ParentID           sql.NullInt64
+	Classifier         string
+	MediaType          string
+	ExternalProvider   sql.NullString
+	ExternalProviderID sql.NullInt64
+	ID_2               sql.NullInt64
+	CreatedAt_2        sql.NullTime
+	Name_2             sql.NullString
+	Description_2      sql.NullString
+	DevicePath         sql.NullString
+	MediaType_2        sql.NullString
+	OwnerID            sql.NullInt64
 }
 
 func (q *Queries) GetContentInfo(ctx context.Context, id int64) (GetContentInfoRow, error) {
@@ -318,20 +398,21 @@ func (q *Queries) GetContentInfo(ctx context.Context, id int64) (GetContentInfoR
 		&i.MediaLibraryID,
 		&i.CreatedAt,
 		&i.FilePath,
-		&i.Extension,
 		&i.Name,
-		&i.Title,
+		&i.MediaTitle,
 		&i.Description,
 		&i.CoverUrl,
-		&i.SeasonNo,
-		&i.EpisodeNo,
-		&i.ImdbID,
+		&i.ParentID,
+		&i.Classifier,
+		&i.MediaType,
+		&i.ExternalProvider,
+		&i.ExternalProviderID,
 		&i.ID_2,
 		&i.CreatedAt_2,
 		&i.Name_2,
 		&i.Description_2,
 		&i.DevicePath,
-		&i.MediaType,
+		&i.MediaType_2,
 		&i.OwnerID,
 	)
 	return i, err

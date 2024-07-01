@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"ocelot/content/types"
+	"ocelot/content"
 )
 
 func TestSearchMovie(t *testing.T) {
@@ -18,7 +18,7 @@ func TestSearchMovie(t *testing.T) {
 	var tmdb Client
 	tmdb.ApiKey = readToken
 
-	res, err := tmdb.SearchMovies(types.SearchParam{
+	res, err := tmdb.SearchMovies(content.SearchParam{
 		Query: "star wars empire strikes back",
 	})
 	if err != nil {
@@ -47,7 +47,7 @@ func TestSearchShows(t *testing.T) {
 	var tmdb Client
 	tmdb.ApiKey = readToken
 
-	res, err := tmdb.SearchShows(types.SearchParam{
+	res, err := tmdb.SearchShows(content.SearchParam{
 		Query: "modern family",
 	})
 	if err != nil {

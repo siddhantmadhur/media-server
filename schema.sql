@@ -40,17 +40,22 @@ CREATE TABLE IF NOT EXISTS content_library (
     created_at TIMESTAMP NOT NULL,
     
     file_path TEXT NOT NULL,
-    extension TEXT NOT NULL,
     name TEXT NOT NULL,
-    title TEXT NOT NULL,
+
+    media_title TEXT NOT NULL,
     description TEXT,
     cover_url TEXT,
-    season_no INTEGER,
-    episode_no INTEGER,
-    imdb_id INTEGER,
+    parent_id INTEGER,
+    classifier TEXT NOT NULL,
+    -- show | movie | season | subtitle | episode
+    media_type TEXT NOT NULL,
+
+    external_provider TEXT,
+    external_provider_id INTEGER,
 
     FOREIGN KEY(media_library_id) REFERENCES media_library(id),
-    UNIQUE(file_path)
+    UNIQUE(file_path),
+    UNIQUE(external_provider_id)
 );
 
 

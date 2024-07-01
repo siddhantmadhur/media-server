@@ -56,7 +56,7 @@ func (m *Manager) GetPlaybackInfo(c echo.Context, u *auth.User, cfg *config.Conf
 	if request.DirectPlay {
 		var response = map[string]string{
 			"media_id":   fmt.Sprint(mediaId),
-			"stream_url": fmt.Sprintf("/media/%d/direct/stream.%s", mediaId, content.Extension),
+			"stream_url": fmt.Sprintf("/media/%d/direct/stream", mediaId),
 			"user_id":    fmt.Sprint(u.UID),
 		}
 

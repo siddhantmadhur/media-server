@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"strings"
 
-	"ocelot/content/types"
+	"ocelot/content"
 )
 
 type Client struct {
 	ApiKey string `json:"api_read_access_token"`
 }
 
-func (t Client) Fetch(params types.FetchParams, result any) error {
+func (t Client) Fetch(params content.FetchParams, result any) error {
 	if params.Method == "" {
 		params.Method = "GET"
 	}
@@ -42,10 +42,10 @@ func (t Client) Fetch(params types.FetchParams, result any) error {
 	return err
 }
 
-func (t Client) GetFromId(Id int) (types.Movie, error) {
-	var result types.Movie
+func (t Client) GetFromId(Id int) (content.Movie, error) {
+	var result content.Movie
 
-	err := t.Fetch(types.FetchParams{
+	err := t.Fetch(content.FetchParams{
 		Endpoint: "/movie/11",
 	}, &result)
 

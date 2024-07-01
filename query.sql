@@ -34,17 +34,30 @@ RETURNING *;
 -- name: GetAllMediaLibraries :many
 SELECT * FROM media_library;
 
--- name: AddNewContentFile :exec
-INSERT INTO content_library (media_library_id,
-created_at,
-file_path,
-extension,
-name,
-title,
-description,
-cover_url,
-season_no,
-episode_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+-- name: AddNewContentFile :one
+INSERT INTO content_library (
+    media_library_id,
+    created_at,
+    file_path,
+    name,
+    media_title,
+    description,
+    cover_url,
+    parent_id,
+    external_provider,
+    external_provider_id,
+    media_type,
+    classifier
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING *;
+
+-- name: GetContentFromPath :one 
+SELECT * FROM content_library
+WHERE file_path = ?;
+
+-- name: GetContentFromExternalId :one 
+SELECT * FROM content_library
+WHERE external_provider_id = ?;
 
 -- name: GetContentInfo :one
 SELECT * FROM content_library

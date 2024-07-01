@@ -2,10 +2,9 @@ package tmdb
 
 import (
 	"fmt"
+	"ocelot/content"
 	"os"
 	"testing"
-
-	"ocelot/content/types"
 )
 
 func TestFetch(t *testing.T) {
@@ -23,7 +22,7 @@ func TestFetch(t *testing.T) {
 		Title string `json:"title"`
 	}
 
-	err := tmdb.Fetch(types.FetchParams{
+	err := tmdb.Fetch(content.FetchParams{
 		Method:   "GET",
 		Endpoint: "/movie/11",
 	}, &result)

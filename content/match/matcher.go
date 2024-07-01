@@ -4,11 +4,11 @@ import (
 	"regexp"
 	"strconv"
 
-	"ocelot/content/types"
+	"ocelot/content"
 )
 
-func SeriesData(fullPath string) (types.Show, error) {
-	var show types.Show
+func SeriesData(fullPath string) (content.Show, error) {
+	var show content.Show
 
 	seasonString, err := regexp.Compile(`(S[0-9]{2,})|(Season\s[0-9]{1,})`)
 	num, err := regexp.Compile(`[0-9]+`)

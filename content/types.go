@@ -1,4 +1,4 @@
-package types
+package content
 
 type Genre struct {
 	Id   int    `json:"id"`

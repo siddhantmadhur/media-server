@@ -10,18 +10,19 @@ import (
 )
 
 type ContentLibrary struct {
-	ID             int64
-	MediaLibraryID int64
-	CreatedAt      time.Time
-	FilePath       string
-	Extension      string
-	Name           string
-	Title          string
-	Description    sql.NullString
-	CoverUrl       sql.NullString
-	SeasonNo       sql.NullInt64
-	EpisodeNo      sql.NullInt64
-	ImdbID         sql.NullInt64
+	ID                 int64
+	MediaLibraryID     int64
+	CreatedAt          time.Time
+	FilePath           string
+	Name               string
+	MediaTitle         string
+	Description        sql.NullString
+	CoverUrl           sql.NullString
+	ParentID           sql.NullInt64
+	Classifier         string
+	MediaType          string
+	ExternalProvider   sql.NullString
+	ExternalProviderID sql.NullInt64
 }
 
 type MediaLibrary struct {

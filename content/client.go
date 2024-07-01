@@ -1,12 +1,11 @@
 package content
 
-import "ocelot/content/types"
-
 type Client interface {
-	Fetch(types.FetchParams, any) error
-	SearchMovies(types.SearchParam) (types.MovieSearchResponse, error)
-	SearchShows(types.SearchParam) (types.ShowSearchResponse, error)
-	GetSeasonInformation(int, int) (types.SeriesDetails, error)
+	Fetch(FetchParams, any) error
+	SearchMovies(SearchParam) (MovieSearchResponse, error)
+	SearchShows(SearchParam) (ShowSearchResponse, error)
+	GetSeasonInformation(int, int) (SeriesDetails, error)
+	GetEpisodeInformation(int, int, int) (SeriesDetails, error)
 	Authenticate() bool
 }
 

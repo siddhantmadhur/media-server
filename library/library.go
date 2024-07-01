@@ -76,7 +76,7 @@ func AddLibraryFolder(c echo.Context, u *auth.User, cfg *config.Config) error {
 		return c.String(500, err.Error())
 	}
 
-	go ScanLibrary(library.ID, cfg)
+	go ScanMediaFiles(library, cfg)
 
 	return c.NoContent(201)
 }
